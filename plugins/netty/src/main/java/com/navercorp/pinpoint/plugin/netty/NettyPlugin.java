@@ -46,12 +46,10 @@ public class NettyPlugin implements ProfilerPlugin, TransformTemplateAware {
 
     private TransformTemplate transformTemplate;
 
-    private NettyConfig config;
 
     @Override
     public void setup(ProfilerPluginSetupContext context) {
         NettyConfig config = new NettyConfig(context.getConfig());
-        this.config = config;
         if (!config.isPluginEnable()) {
             logger.info("Disable netty option. 'profiler.netty=false'");
             return;
@@ -114,7 +112,7 @@ public class NettyPlugin implements ProfilerPlugin, TransformTemplateAware {
 
             final InstrumentMethod writeMethod2 = InstrumentUtils.findMethod(target, "write", "java.lang.Object", "io.netty.channel.ChannelPromise");
             if (writeMethod2 != null) {
-                writeMethod1.addScopedInterceptor(NettyConstants.INTERCEPTOR_CHANNEL_PIPELINE_WRITE, NettyConstants.SCOPE_WRITE, ExecutionPolicy.BOUNDARY);
+                writeMethod2.addScopedInterceptor(NettyConstants.INTERCEPTOR_CHANNEL_PIPELINE_WRITE, NettyConstants.SCOPE_WRITE, ExecutionPolicy.BOUNDARY);
             }
 
             final InstrumentMethod writeAndFlushMethod1 = InstrumentUtils.findMethod(target, "writeAndFlush", "java.lang.Object");
@@ -168,7 +166,7 @@ public class NettyPlugin implements ProfilerPlugin, TransformTemplateAware {
 
             final InstrumentMethod addListenerMethod2 = InstrumentUtils.findMethod(target, "addListeners", "io.netty.util.concurrent.GenericFutureListener[]");
             if (addListenerMethod2 != null) {
-                addListenerMethod1.addScopedInterceptor(NettyConstants.INTERCEPTOR_CHANNEL_PROMISE_ADD_LISTENER, NettyConstants.SCOPE, ExecutionPolicy.BOUNDARY);
+                addListenerMethod2.addScopedInterceptor(NettyConstants.INTERCEPTOR_CHANNEL_PROMISE_ADD_LISTENER, NettyConstants.SCOPE, ExecutionPolicy.BOUNDARY);
             }
 
             return target.toBytecode();

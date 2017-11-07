@@ -16,6 +16,7 @@
 package com.navercorp.pinpoint.common.server.bo.stat.join;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -23,16 +24,25 @@ import java.util.List;
  */
 public class JoinAgentStatBo implements JoinStatBo {
     public static final JoinAgentStatBo EMPTY_JOIN_AGENT_STAT_BO = new JoinAgentStatBo();
-    private static final List<JoinCpuLoadBo>  EMPTY_JOIN_CPU_LOAD_BO_LIST = new ArrayList<JoinCpuLoadBo>(0);
-    private static final List<JoinMemoryBo> EMPTY_JOIN_MEMORY_BO_LIST = new ArrayList<JoinMemoryBo>();
-    private static final List<JoinTransactionBo> EMPTY_JOIN_TRANSACTION_BO_LIST = new ArrayList<JoinTransactionBo>();
+
 
     private String agentId = UNKNOWN_AGENT;
     private long agentStartTimestamp = Long.MIN_VALUE;
     private long timestamp = Long.MIN_VALUE;
-    private List<JoinCpuLoadBo> joinCpuLoadBoList = EMPTY_JOIN_CPU_LOAD_BO_LIST;
-    private List<JoinMemoryBo> joinMemoryBoList = EMPTY_JOIN_MEMORY_BO_LIST;
-    private List<JoinTransactionBo> joinTransactionBoList = EMPTY_JOIN_TRANSACTION_BO_LIST;
+    private List<JoinCpuLoadBo> joinCpuLoadBoList = Collections.emptyList();
+    private List<JoinMemoryBo> joinMemoryBoList = Collections.emptyList();
+    private List<JoinTransactionBo> joinTransactionBoList = Collections.emptyList();
+    private List<JoinActiveTraceBo> joinActiveTraceBoList = Collections.emptyList();
+    private List<JoinResponseTimeBo> joinResponseTimeBoList = Collections.emptyList();
+    private List<JoinDataSourceListBo> joinDataSourceListBoList = Collections.emptyList();
+
+    public List<JoinResponseTimeBo> getJoinResponseTimeBoList() {
+        return joinResponseTimeBoList;
+    }
+
+    public void setJoinResponseTimeBoList(List<JoinResponseTimeBo> joinResponseTimeBoList) {
+        this.joinResponseTimeBoList = joinResponseTimeBoList;
+    }
 
     public void setId(String id) {
         this.agentId = id;
@@ -40,6 +50,10 @@ public class JoinAgentStatBo implements JoinStatBo {
 
     public void setJoinCpuLoadBoList(List<JoinCpuLoadBo> joinCpuLoadBoList) {
         this.joinCpuLoadBoList = joinCpuLoadBoList;
+    }
+
+    public void setJoinDataSourceListBoList(List<JoinDataSourceListBo> joinDataSourceListBoList) {
+        this.joinDataSourceListBoList = joinDataSourceListBoList;
     }
 
     public String getId() {
@@ -103,5 +117,17 @@ public class JoinAgentStatBo implements JoinStatBo {
 
     public List<JoinTransactionBo> getJoinTransactionBoList() {
         return joinTransactionBoList;
+    }
+
+    public void setJoinActiveTraceBoList(List<JoinActiveTraceBo> joinActiveTraceBoList) {
+        this.joinActiveTraceBoList = joinActiveTraceBoList;
+    }
+
+    public List<JoinActiveTraceBo> getJoinActiveTraceBoList() {
+        return joinActiveTraceBoList;
+    }
+
+    public List<JoinDataSourceListBo> getJoinDataSourceListBoList() {
+        return joinDataSourceListBoList;
     }
 }

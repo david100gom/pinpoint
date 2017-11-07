@@ -225,7 +225,11 @@ log.button.name= log
 
 **step 3**
 Pinpoint 1.5.0 or later, we improve button to decided enable/disable depending on whether or not being logged.
+<<<<<<< HEAD
 You should implement interceptor for using logging appender to add logic whether or not being logged. you also should create plugin for logging appdender internally.
+=======
+You should implement interceptor for using logging appender to add logic whether or not being logged. you also should create plugin for logging appender internally.
+>>>>>>> af87e234a0b7e15909d6afdf1a56a1fe2ddc2269
 Please refer to Pinpoint Profiler Plugin Sample([Link](https://github.com/naver/pinpoint-plugin-sample)).
 Location added logic of interceptor is method to log for data of LoggingEvent in appender class. you should review your appender class and find method.
 This is interceptor example.

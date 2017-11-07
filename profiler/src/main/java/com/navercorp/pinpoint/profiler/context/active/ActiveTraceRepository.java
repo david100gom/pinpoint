@@ -25,10 +25,14 @@ import java.util.List;
  */
 public interface ActiveTraceRepository {
 
-    List<ActiveTraceSnapshot> collect();
+    ActiveTraceHistogram getActiveTraceHistogram(long timeStamp);
+
+    List<ActiveTraceSnapshot> snapshot();
+
+    List<Long> getThreadIdList();
 
     ActiveTraceHandle register(TraceRoot traceRoot);
 
-    ActiveTraceHandle register(long localTransactionId, long startTime, Thread thread);
+    ActiveTraceHandle register(long localTransactionId, long startTime, long threadId);
 
 }

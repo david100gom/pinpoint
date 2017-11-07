@@ -34,14 +34,15 @@ public class DisableTrace implements Trace {
 
     private final long id;
     private final long startTime;
-    private final Thread bindThread;
+    private final long threadId;
     private final DefaultTraceScopePool scopePool = new DefaultTraceScopePool();
     private final ActiveTraceHandle handle;
+    private boolean closed = false;
 
-    public DisableTrace(long id, long startTime, Thread bindThread, ActiveTraceHandle handle) {
+    public DisableTrace(long id, long startTime, long threadId, ActiveTraceHandle handle) {
         this.id = id;
         this.startTime = startTime;
-        this.bindThread = Assert.requireNonNull(bindThread, "bindThread must not be null");
+        this.threadId = threadId;
         this.handle = Assert.requireNonNull(handle, "handle must not be null");
     }
 
@@ -57,7 +58,12 @@ public class DisableTrace implements Trace {
 
     @Override
     public Thread getBindThread() {
-        return bindThread;
+        return null;
+    }
+
+    @Override
+    public long getThreadId() {
+        return threadId;
     }
 
     @Override
@@ -112,7 +118,16 @@ public class DisableTrace implements Trace {
     }
 
     @Override
+    public boolean isClosed() {
+        return closed;
+    }
+
+    @Override
     public void close() {
+        if (closed) {
+            return;
+        }
+        closed = true;
         final long purgeTime = System.currentTimeMillis();
         handle.purge(purgeTime);
     }
@@ -130,7 +145,7 @@ public class DisableTrace implements Trace {
 
     @Override
     public SpanEventRecorder currentSpanEventRecorder() {
-        return null;
+       return null;
     }
 
     @Override

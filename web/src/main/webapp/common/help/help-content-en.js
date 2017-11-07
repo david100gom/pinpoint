@@ -62,11 +62,16 @@
 						desc: "Sends an alarm when deadlock condition is detected in application."
 					}]
 				}]
+			},
+			installation: {
+				desc: "* You can check whether the Application Name and Agent Id are duplicated.",
+				lengthGuide: "You can enter up to {{MAX_CHAR}} characters."
 			}
 		},	
 		navbar : {
 			searchPeriod : {
-				guide: "Search duration may not be greater than {{day}} days."
+				guideDateMax: "Search duration may not be greater than {{day}} days.",
+				guideDateOrder: "Date or time set incorrectly"
 			},
 			applicationSelector: {
 				mainStyle: "",
@@ -488,6 +493,7 @@
 			}
 		},
 		inspector: {
+			noDataCollected: "No data collected",
 			list: {
 				mainStyle: "",
 				title: "Agent list",
@@ -747,6 +753,60 @@
 					},{
 						name: "MIN",
 						desc: "Lowest TPS of the agents"
+					}]
+				}]
+			},
+			statActiveThread: {
+				mainStyle: "",
+				title: "Active Thread",
+				desc: "Number of active threads serving user requests",
+				category: [{
+					title: "[Legend]",
+					items: [{
+						name: "MAX",
+						desc: "Highest active thread count of the agents serving user requests"
+					},{
+						name: "AVG",
+						desc: "Average active thread count of the agents serving user requests"
+					},{
+						name: "MIN",
+						desc: "Lowest active thread count of the agents serving user requests"
+					}]
+				}]
+			},
+			statResponseTime: {
+				mainStyle: "",
+				title: "Response Time",
+				desc: "Average response times served by the agents",
+				category: [{
+					title: "[Legend]",
+					items: [{
+						name: "MAX",
+						desc: "Highest average response time of requests served by an agent"
+					},{
+						name: "AVG",
+						desc: "Average response time of requests served by all agents"
+					},{
+						name: "MIN",
+						desc: "Lowest average response time of requests served by an agent"
+					}]
+				}]
+			},
+			statDataSource: {
+				mainStyle: "",
+				title: "Data Source",
+				desc: "Status of the agents' data source",
+				category: [{
+					title: "[Legend]",
+					items: [{
+						name: "MAX",
+						desc: "Largest data source connection count of the agents"
+					},{
+						name: "AVG",
+						desc: "Average data source connection count of the agents"
+					},{
+						name: "MIN",
+						desc: "Smallest data source connection count of the agents"
 					}]
 				}]
 			}

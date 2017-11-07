@@ -53,20 +53,25 @@
 						desc: "heap의 사용률이 임계치를 초과한 경우 알람이 전송된다."
 					},{
 						name: "JVM CPU USAGE RATE",
-						desc: "applicaiton의 CPU 사용률이 임계치를 초과한 경우 알람이 전송된다."
+						desc: "application의 CPU 사용률이 임계치를 초과한 경우 알람이 전송된다."
 					},{
 						name: "DATASOURCE CONNECTION USAGE RATE",
-						desc: "applicaiton의 DataSource내의 Connection 사용률이 임계치를 초과한 경우 알람이 전송된다."
+						desc: "application의 DataSource내의 Connection 사용률이 임계치를 초과한 경우 알람이 전송된다."
 					}, {
 						name: "DEADLOCK OCCURRENCE",
-						desc: "applicaiton에서 데드락 상태가 탐지되면 알람이 전송된다."
+						desc: "application에서 데드락 상태가 탐지되면 알람이 전송된다."
 					}]
 				}]
+			},
+			installation: {
+				desc: "* Application Name 과 Agent Id의 중복 여부를 확인 할 수 있습니다.",
+				lengthGuide: "1 ~ {{MAX_CHAR}}자의 문자를 입력하세요."
 			}
 		},
 		navbar : {
 			searchPeriod : {
-				guide: "한번에 검색 할 수 있는 최대 기간은 {{day}}일 입니다."
+				guideDateMax: "한번에 검색 할 수 있는 최대 기간은 {{day}}일 입니다.",
+				guideDateOrder: "날짜 및 시간을 잘못 설정 하였습니다."
 			},
 			applicationSelector: {
 				mainStyle: "",
@@ -507,6 +512,7 @@
 			}
 		},
 		inspector: {
+			noDataCollected: "No data collected",
 			list: {
 				mainStyle: "",
 				title: "Agent 리스트",
@@ -767,6 +773,60 @@
 					},{
 						name: "MIN",
 						desc: "Agent들의 트랜잭션 수 중 가장 작은 값"
+					}]
+				}]
+			},
+			statActiveThread: {
+				mainStyle: "",
+				title: "Active Thread",
+				desc: "사용자의 request를 처리하는 active thread 수",
+				category: [{
+					title: "[범례]",
+					items: [{
+						name: "MAX",
+						desc: "Agent들의 active thread 수 중 가장 큰 값"
+					},{
+						name: "AVG",
+						desc: "Agent들의 active thread 수의 평균값"
+					},{
+						name: "MIN",
+						desc: "Agent들의 active thread 수 중 가장 작은 값"
+					}]
+				}]
+			},
+			statResponseTime: {
+				mainStyle: "",
+				title: "Response Time",
+				desc: "Agent들의 평균 Response Time(단위: millisecond)",
+				category: [{
+					title: "[범례]",
+					items: [{
+						name: "MAX",
+						desc: "agent들의 평균 Response Time 중 가장 큰 값"
+					},{
+						name: "AVG",
+						desc: "agent들의 평균 Response Time의 평균값"
+					},{
+						name: "MIN",
+						desc: "agent들의 평균 Response Time 중 가장 작은 값"
+					}]
+				}]
+			},
+			statDataSource: {
+				mainStyle: "",
+				title: "Data Source",
+				desc: "Agent들의 DataSource 현황",
+				category: [{
+					title: "[범례]",
+					items: [{
+						name: "MAX",
+						desc: "agent들의 DataSource connection 개수 중 가장 큰 값"
+					},{
+						name: "AVG",
+						desc: "agent들의 DataSource connection 개수의 평균값"
+					},{
+						name: "MIN",
+						desc: "agent들의 DataSource connection 개수 중 가장 작은 값"
 					}]
 				}]
 			}

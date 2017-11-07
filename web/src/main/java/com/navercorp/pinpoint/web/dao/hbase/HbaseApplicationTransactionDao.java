@@ -44,8 +44,7 @@ public class HbaseApplicationTransactionDao implements ApplicationTransactionDao
     private JoinTransactionSampler transactionSampler;
 
     @Autowired
-    private
-    HbaseApplicationStatDaoOperations operations;
+    private HbaseApplicationStatDaoOperations operations;
 
     @Override
     public List<AggreJoinTransactionBo> getApplicationStatList(String applicationId, TimeWindow timeWindow) {
@@ -59,12 +58,12 @@ public class HbaseApplicationTransactionDao implements ApplicationTransactionDao
     }
 
     private List<AggreJoinTransactionBo> cast(List<AggregationStatData> aggregationStatDataList) {
-        List<AggreJoinTransactionBo> aggreJoinCpuLoadBoList = new ArrayList<>(aggregationStatDataList.size());
+        List<AggreJoinTransactionBo> aggreJoinTransactionBoList = new ArrayList<>(aggregationStatDataList.size());
 
         for (AggregationStatData aggregationStatData : aggregationStatDataList) {
-            aggreJoinCpuLoadBoList.add((AggreJoinTransactionBo) aggregationStatData);
+            aggreJoinTransactionBoList.add((AggreJoinTransactionBo) aggregationStatData);
         }
 
-        return aggreJoinCpuLoadBoList;
+        return aggreJoinTransactionBoList;
     }
 }

@@ -21,7 +21,7 @@ import java.util.List;
  * @author minwoo.jung
  */
 public class JoinTransactionBo implements JoinStatBo {
-    public static final JoinTransactionBo EMPTY_TRANSACTION_BO = new JoinTransactionBo();
+    public static final JoinTransactionBo EMPTY_JOIN_TRANSACTION_BO = new JoinTransactionBo();
     public static final long UNCOLLECTED_VALUE = -1;
 
     private String id = UNKNOWN_ID;
@@ -117,7 +117,7 @@ public class JoinTransactionBo implements JoinStatBo {
         final int boCount = joinTransactionBoList.size();
 
         if (boCount == 0) {
-            return JoinTransactionBo.EMPTY_TRANSACTION_BO;
+            return JoinTransactionBo.EMPTY_JOIN_TRANSACTION_BO;
         }
 
         final JoinTransactionBo initJoinTransactionBo = joinTransactionBoList.get(0);
@@ -179,9 +179,22 @@ public class JoinTransactionBo implements JoinStatBo {
         if (maxTotalCount != that.maxTotalCount) return false;
         if (minTotalCount != that.minTotalCount) return false;
         if (timestamp != that.timestamp) return false;
-        if (id != null ? !id.equals(that.id) : that.id != null) return false;
-        if (maxTotalCountAgentId != null ? !maxTotalCountAgentId.equals(that.maxTotalCountAgentId) : that.maxTotalCountAgentId != null) return false;
-        return minTotalCountAgentId != null ? minTotalCountAgentId.equals(that.minTotalCountAgentId) : that.minTotalCountAgentId == null;
+        if (!id.equals(that.id)) return false;
+        if (!maxTotalCountAgentId.equals(that.maxTotalCountAgentId)) return false;
+        return minTotalCountAgentId.equals(that.minTotalCountAgentId);
 
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + (int) (collectInterval ^ (collectInterval >>> 32));
+        result = 31 * result + (int) (totalCount ^ (totalCount >>> 32));
+        result = 31 * result + maxTotalCountAgentId.hashCode();
+        result = 31 * result + (int) (maxTotalCount ^ (maxTotalCount >>> 32));
+        result = 31 * result + minTotalCountAgentId.hashCode();
+        result = 31 * result + (int) (minTotalCount ^ (minTotalCount >>> 32));
+        result = 31 * result + (int) (timestamp ^ (timestamp >>> 32));
+        return result;
     }
 }

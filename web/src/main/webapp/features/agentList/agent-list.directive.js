@@ -48,7 +48,7 @@
 								if ( bApplicationChange ) {
 									// scope.$emit( "up.changed.agent", cfg.ID, { agentId: "" }, true );
 									scope.currentAgent = null;
-									scope.$emit( "up.select.application", cfg.ID );
+									// scope.$emit( "up.select.application", cfg.ID );
 								} else {
 									scope.currentAgent = findAgentByAgentId(UrlVoService.getAgentId());
 									if ( scope.currentAgent === null ) {
@@ -72,7 +72,6 @@
 						return null;
 					}
 					function changeAgent( agent, bInvokedByTop ) {
-						console.log(" changeAgent ");
 						AnalyticsService.send( AnalyticsService.CONST.INSPECTOR, AnalyticsService.CONST.CLK_CHANGE_AGENT_INSPECTOR );
 						scope.currentAgent = agent;
 						scope.$emit( "up.changed.agent", cfg.ID, agent, bInvokedByTop );
@@ -90,7 +89,6 @@
 						scope.$emit( "up.select.application", cfg.ID );
 					};
 					scope.selectAgent = function ( agent ) {
-						console.log( "selectAgent ->", agent );
 						if ( scope.currentAgent === agent ) {
 							return;
 						}

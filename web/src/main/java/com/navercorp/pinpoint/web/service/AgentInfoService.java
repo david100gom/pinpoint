@@ -16,6 +16,7 @@
 
 package com.navercorp.pinpoint.web.service;
 
+import com.navercorp.pinpoint.web.vo.AgentDownloadInfo;
 import com.navercorp.pinpoint.web.vo.AgentInfo;
 import com.navercorp.pinpoint.web.vo.AgentStatus;
 import com.navercorp.pinpoint.web.vo.ApplicationAgentHostList;
@@ -55,4 +56,9 @@ public interface AgentInfoService {
     void populateAgentStatuses(Collection<AgentInfo> agentInfos, long timestamp);
 
     InspectorTimeline getAgentStatusTimeline(String agentId, Range range, int... excludeAgentEventTypeCodes);
+
+    boolean isExistAgentId(String agentId);
+
+    AgentDownloadInfo getLatestStableAgentDownloadInfo();
+
 }

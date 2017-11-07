@@ -15,11 +15,9 @@
  */
 package com.navercorp.pinpoint.collector.mapper.thrift.stat;
 
-import com.navercorp.pinpoint.common.server.bo.stat.AgentStatBo;
-import com.navercorp.pinpoint.common.server.bo.stat.CpuLoadBo;
-import com.navercorp.pinpoint.common.server.bo.stat.JvmGcBo;
-import com.navercorp.pinpoint.common.server.bo.stat.TransactionBo;
+import com.navercorp.pinpoint.common.server.bo.stat.*;
 import com.navercorp.pinpoint.thrift.dto.flink.TFAgentStat;
+import com.navercorp.pinpoint.thrift.dto.flink.TFDataSourceList;
 import com.navercorp.pinpoint.thrift.dto.flink.TFJvmGc;
 
 import java.util.*;
@@ -31,6 +29,9 @@ public class TFAgentStatMapper {
     private static final TFCpuLoadMapper tFCpuLoadMapper = new TFCpuLoadMapper();
     private static final TFJvmGcMapper tFJvmGcMapper = new TFJvmGcMapper();
     private static final TFTransactionMapper tFTransactionMapper = new TFTransactionMapper();
+    private static final TFActiveTraceMapper tFActiveTraceMapper = new TFActiveTraceMapper();
+    private static final TFResponseTimeMapper tFResponseTimeMapper = new TFResponseTimeMapper();
+    private static final TFDataSourceListBoMapper tFDataSourceListBoMapper = new TFDataSourceListBoMapper();
 
     public List<TFAgentStat> map(AgentStatBo agentStatBo) {
         final TreeMap<Long, TFAgentStat> tFAgentStatMap = new TreeMap<>();
@@ -40,8 +41,43 @@ public class TFAgentStatMapper {
         insertTFCpuLoad(tFAgentStatMap, agentStatBo.getCpuLoadBos(), agentId, startTimestamp);
         insertTFJvmGc(tFAgentStatMap, agentStatBo.getJvmGcBos(), agentId, startTimestamp);
         insertTFTransaction(tFAgentStatMap, agentStatBo.getTransactionBos(), agentId, startTimestamp);
-
+        insertTFActiveTrace(tFAgentStatMap, agentStatBo.getActiveTraceBos(), agentId, startTimestamp);
+        insertTFResponseTime(tFAgentStatMap, agentStatBo.getResponseTimeBos(), agentId, startTimestamp);
+        insertTFDataSourceList(tFAgentStatMap, agentStatBo.getDataSourceListBos(), agentId, startTimestamp);
         return new ArrayList<>(tFAgentStatMap.values());
+    }
+
+    private void insertTFDataSourceList(TreeMap<Long, TFAgentStat> tFAgentStatMap, List<DataSourceListBo> dataSourceListBoList, String agentId, long startTimestamp) {
+        if (dataSourceListBoList == null) {
+            return;
+        }
+
+        for (DataSourceListBo dataSourceListBo : dataSourceListBoList) {
+            TFAgentStat tFAgentStat = getOrCreateTFAgentStat(tFAgentStatMap, dataSourceListBo.getTimestamp(), agentId, startTimestamp);
+            tFAgentStat.setDataSourceList(tFDataSourceListBoMapper.map(dataSourceListBo));
+        }
+    }
+
+    private void insertTFResponseTime(TreeMap<Long, TFAgentStat> tFAgentStatMap, List<ResponseTimeBo> responseTimeBoList, String agentId, long startTimestamp) {
+        if (responseTimeBoList == null) {
+            return;
+        }
+
+        for (ResponseTimeBo responseTimeBo : responseTimeBoList) {
+            TFAgentStat tFAgentStat = getOrCreateTFAgentStat(tFAgentStatMap, responseTimeBo.getTimestamp(), agentId, startTimestamp);
+            tFAgentStat.setResponseTime(tFResponseTimeMapper.map(responseTimeBo));
+        }
+    }
+
+    private void insertTFActiveTrace(TreeMap<Long, TFAgentStat> tFAgentStatMap, List<ActiveTraceBo> activeTraceBoList, String agentId, long startTimestamp) {
+        if (activeTraceBoList == null) {
+            return;
+        }
+
+        for (ActiveTraceBo activeTraceBo : activeTraceBoList) {
+            TFAgentStat tFAgentStat = getOrCreateTFAgentStat(tFAgentStatMap, activeTraceBo.getTimestamp(), agentId, startTimestamp);
+            tFAgentStat.setActiveTrace(tFActiveTraceMapper.map(activeTraceBo));
+        }
     }
 
     private void insertTFTransaction(TreeMap<Long, TFAgentStat> tFAgentStatMap, List<TransactionBo> transactionBoList, String agentId, long startTimestamp) {
@@ -50,9 +86,9 @@ public class TFAgentStatMapper {
         }
 
         for (TransactionBo transactionBo : transactionBoList) {
-            TFAgentStat tfAgentStat = getOrCreateTFAgentStat(tFAgentStatMap, transactionBo.getTimestamp(), agentId, startTimestamp);
-            tfAgentStat.setCollectInterval(transactionBo.getCollectInterval());
-            tfAgentStat.setTransaction(tFTransactionMapper.map(transactionBo));
+            TFAgentStat tFAgentStat = getOrCreateTFAgentStat(tFAgentStatMap, transactionBo.getTimestamp(), agentId, startTimestamp);
+            tFAgentStat.setCollectInterval(transactionBo.getCollectInterval());
+            tFAgentStat.setTransaction(tFTransactionMapper.map(transactionBo));
         }
     }
 
@@ -62,8 +98,8 @@ public class TFAgentStatMapper {
         }
 
         for (JvmGcBo jvmGcBo : jvmGcBoList) {
-            TFAgentStat tfAgentStat = getOrCreateTFAgentStat(tFAgentStatMap, jvmGcBo.getTimestamp(), agentId, startTimestamp);
-            tfAgentStat.setGc(tFJvmGcMapper.map(jvmGcBo));
+            TFAgentStat tFAgentStat = getOrCreateTFAgentStat(tFAgentStatMap, jvmGcBo.getTimestamp(), agentId, startTimestamp);
+            tFAgentStat.setGc(tFJvmGcMapper.map(jvmGcBo));
         }
     }
 
@@ -86,7 +122,6 @@ public class TFAgentStatMapper {
             tFAgentStat.setAgentId(agentId);
             tFAgentStat.setStartTimestamp(startTimestamp);
             tFAgentStat.setTimestamp(timestamp);
-            // TODO : (minwoo) need to set connectInterval value to use transaction info
             tFAgentStatMap.put(timestamp, tFAgentStat);
         }
 

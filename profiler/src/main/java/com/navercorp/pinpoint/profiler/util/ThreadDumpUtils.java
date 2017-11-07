@@ -26,35 +26,17 @@ import java.lang.management.LockInfo;
 import java.lang.management.MonitorInfo;
 import java.lang.management.ThreadInfo;
 import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
 
 /**
  * @author Taejin Koo
  */
 public class ThreadDumpUtils {
 
-    private static final Map<Thread.State, TThreadState> THREAD_STATE_MAP = toTThreadStateMap();
-
-    private static Map<Thread.State, TThreadState>  toTThreadStateMap() {
-
-        final EnumMap<Thread.State, TThreadState> threadStateMap = new EnumMap<Thread.State, TThreadState>(Thread.State.class);
-
-        for (Thread.State threadState : Thread.State.values()) {
-            final String threadStateName = threadState.name();
-            for (TThreadState tState : TThreadState.values()) {
-                if (tState.name().equalsIgnoreCase(threadStateName)) {
-                    threadStateMap.put(threadState, tState);
-                }
-            }
-        }
-        Assert.state(threadStateMap.size() == Thread.State.values().length, "TThreadStateEnumMap create fail. ");
-        return threadStateMap;
-    }
-
 
     public static TThreadDump createTThreadDump(Thread thread) {
-        ThreadInfo threadInfo = ThreadMXBeanUtils.findThread(thread);
+        Assert.requireNonNull(thread, "thread must not be null");
+
+        ThreadInfo threadInfo = ThreadMXBeanUtils.getThreadInfo(thread.getId());
         if (threadInfo == null) {
             return null;
         }
@@ -63,7 +45,9 @@ public class ThreadDumpUtils {
     }
 
     public static TThreadDump createTThreadDump(Thread thread, int stackTraceMaxDepth) {
-        ThreadInfo threadInfo = ThreadMXBeanUtils.findThread(thread, stackTraceMaxDepth);
+        Assert.requireNonNull(thread, "thread must not be null");
+
+        ThreadInfo threadInfo = ThreadMXBeanUtils.getThreadInfo(thread.getId(), stackTraceMaxDepth);
         if (threadInfo == null) {
             return null;
         }
@@ -83,7 +67,7 @@ public class ThreadDumpUtils {
     }
 
     public static TThreadDump createTThreadDump(long threadId) {
-        ThreadInfo threadInfo = ThreadMXBeanUtils.findThread(threadId);
+        ThreadInfo threadInfo = ThreadMXBeanUtils.getThreadInfo(threadId);
         if (threadInfo == null) {
             return null;
         }
@@ -92,7 +76,7 @@ public class ThreadDumpUtils {
     }
 
     public static TThreadDump createTThreadDump(long threadId, int stackTraceMaxDepth) {
-        ThreadInfo threadInfo = ThreadMXBeanUtils.findThread(threadId, stackTraceMaxDepth);
+        ThreadInfo threadInfo = ThreadMXBeanUtils.getThreadInfo(threadId, stackTraceMaxDepth);
         if (threadInfo == null) {
             return null;
         }
@@ -104,11 +88,21 @@ public class ThreadDumpUtils {
         if (threadState == null) {
             throw new NullPointerException("threadState must not be null");
         }
-        final TThreadState tThreadState = THREAD_STATE_MAP.get(threadState);
-        if (tThreadState == null) {
-            return TThreadState.UNKNOWN;
+        switch (threadState) {
+            case NEW:
+                return TThreadState.NEW;
+            case RUNNABLE:
+                return TThreadState.RUNNABLE;
+            case BLOCKED:
+                return TThreadState.BLOCKED;
+            case WAITING:
+                return TThreadState.WAITING;
+            case TIMED_WAITING:
+                return TThreadState.TIMED_WAITING;
+            case TERMINATED:
+                return TThreadState.TERMINATED;
         }
-        return tThreadState;
+        return TThreadState.UNKNOWN;
     }
 
     private static void setThreadInfo(TThreadDump threadDump, ThreadInfo threadInfo) {

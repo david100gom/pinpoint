@@ -39,7 +39,11 @@ public interface Shared {
     String getRpcName();
 
 
-    void setThread(Thread thread);
+    void setThreadId(long threadId);
 
-    Thread getThread();
+    long getThreadId();
+
+    void setStatusCode(int statusCode);
+
+    int getStatusCode();
 }

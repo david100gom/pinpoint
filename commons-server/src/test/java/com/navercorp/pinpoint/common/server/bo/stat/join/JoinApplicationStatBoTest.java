@@ -246,13 +246,13 @@ public class JoinApplicationStatBoTest {
     private JoinApplicationStatBo createJoinApplicationStatBo2(final String id, final long timestamp, final int plus) {
         final JoinApplicationStatBo joinApplicationStatBo = new JoinApplicationStatBo();
         joinApplicationStatBo.setId(id);
-        joinApplicationStatBo.setJoinMemoryBoList(createJoinMemoryBoList2(id, timestamp, plus));
+        joinApplicationStatBo.setJoinMemoryBoList(createJoinMemoryBoList(id, timestamp, plus));
         joinApplicationStatBo.setTimestamp(timestamp);
         joinApplicationStatBo.setStatType(StatType.APP_STST);
         return joinApplicationStatBo;
     }
 
-    private List<JoinMemoryBo> createJoinMemoryBoList2(final String id, final long currentTime, int plus) {
+    private List<JoinMemoryBo> createJoinMemoryBoList(final String id, final long currentTime, int plus) {
         final List<JoinMemoryBo> joinMemoryBoList = new ArrayList<JoinMemoryBo>();
         JoinMemoryBo joinMemoryBo1 = new JoinMemoryBo(id, currentTime, 3000 + plus, 2000 + plus, 5000 + plus, id + "_1", id + "_2", 500 + plus, 50 + plus, 600 + plus, id + "_3", id + "_4");
         JoinMemoryBo joinMemoryBo2 = new JoinMemoryBo(id, currentTime + 5000, 4000 + plus, 1000 + plus, 7000 + plus, id + "_1", id + "_2", 400 + plus, 150 + plus, 600 + plus, id + "_3", id + "_4");
@@ -412,13 +412,13 @@ public class JoinApplicationStatBoTest {
     private JoinApplicationStatBo createJoinApplicationStatBo3(final String id, final long timestamp, final int plus) {
         final JoinApplicationStatBo joinApplicationStatBo = new JoinApplicationStatBo();
         joinApplicationStatBo.setId(id);
-        joinApplicationStatBo.setJoinTransactionBoList(createJoinTransactionBoList3(id, timestamp, plus));
+        joinApplicationStatBo.setJoinTransactionBoList(createJoinTransactionBoList(id, timestamp, plus));
         joinApplicationStatBo.setTimestamp(timestamp);
         joinApplicationStatBo.setStatType(StatType.APP_STST);
         return joinApplicationStatBo;
     }
 
-    private List<JoinTransactionBo> createJoinTransactionBoList3(final String id, final long currentTime, int plus) {
+    private List<JoinTransactionBo> createJoinTransactionBoList(final String id, final long currentTime, int plus) {
         final List<JoinTransactionBo> joinTransactionBoList = new ArrayList<JoinTransactionBo>();
 
         JoinTransactionBo joinTransactionBo1 = new JoinTransactionBo(id, 5000, 100 + plus, 60 + plus, id + "_1", 200 + plus, id + "_2", currentTime);
@@ -432,11 +432,6 @@ public class JoinApplicationStatBoTest {
         joinTransactionBoList.add(joinTransactionBo3);
         joinTransactionBoList.add(joinTransactionBo4);
         joinTransactionBoList.add(joinTransactionBo5);
-
-
-        for (JoinTransactionBo joinTransactionBo : joinTransactionBoList) {
-            System.out.println(joinTransactionBo);
-        }
 
         return joinTransactionBoList;
     }
@@ -550,6 +545,589 @@ public class JoinApplicationStatBoTest {
     }
 
     @Test
+    public void joinApplicationStatBoByTimeSlice7Test() {
+        final long currentTime = 1487149800000L; // 18:10:00 15 2 2017
+        List<JoinApplicationStatBo> joinApplicationStatBoList = new ArrayList<JoinApplicationStatBo>();
+        joinApplicationStatBoList.add(createJoinApplicationStatBo4("id1", currentTime, 10));
+        joinApplicationStatBoList.add(createJoinApplicationStatBo4("id2", currentTime + 1000, -40));
+        joinApplicationStatBoList.add(createJoinApplicationStatBo4("id3", currentTime + 2000, -30));
+        joinApplicationStatBoList.add(createJoinApplicationStatBo4("id4", currentTime + 3000, 40));
+        joinApplicationStatBoList.add(createJoinApplicationStatBo4("id5", currentTime + 4000, -50));
+        JoinApplicationStatBo resultJoinApplicationStatBo = JoinApplicationStatBo.joinApplicationStatBoByTimeSlice(joinApplicationStatBoList);
+        List<JoinActiveTraceBo> joinActiveTraceBoList = resultJoinApplicationStatBo.getJoinActiveTraceBoList();
+        Collections.sort(joinActiveTraceBoList, new ComparatorImpl4());
+        assertJoinActiveTraceBoList(joinActiveTraceBoList);
+    }
+
+    @Test
+    public void joinApplicationStatBoByTimeSlice8Test() {
+        List<JoinApplicationStatBo> joinApplicationStatBoList = new ArrayList<JoinApplicationStatBo>();
+
+        List<JoinActiveTraceBo> joinActiveTraceBoList1 = new ArrayList<JoinActiveTraceBo>();
+        JoinActiveTraceBo joinActiveTraceBo1_1 = new JoinActiveTraceBo("agent1", 1, (short)2, 100, 60, "agent1", 200, "agent1", 1498462545000L);
+        JoinActiveTraceBo joinActiveTraceBo1_2 = new JoinActiveTraceBo("agent2", 1, (short)2, 100, 60, "agent1", 200, "agent1", 1498462550000L);
+        JoinActiveTraceBo joinActiveTraceBo1_3 = new JoinActiveTraceBo("agent3", 1, (short)2, 100, 60, "agent1", 200, "agent1", 1498462555000L);
+        joinActiveTraceBoList1.add(joinActiveTraceBo1_1);
+        joinActiveTraceBoList1.add(joinActiveTraceBo1_2);
+        joinActiveTraceBoList1.add(joinActiveTraceBo1_3);
+        JoinApplicationStatBo joinApplicationStatBo1 = new JoinApplicationStatBo();
+        joinApplicationStatBo1.setId("test_app");
+        joinApplicationStatBo1.setJoinActiveTraceBoList(joinActiveTraceBoList1);
+        joinApplicationStatBo1.setTimestamp(1498462545000L);
+        joinApplicationStatBoList.add(joinApplicationStatBo1);
+
+        List<JoinActiveTraceBo> joinActiveTraceBoList2 = new ArrayList<JoinActiveTraceBo>();
+        JoinActiveTraceBo joinActiveTraceBo2_1 = new JoinActiveTraceBo("agent1", 1, (short)2, 50, 20, "agent1", 230, "agent1", 1498462545000L);
+        JoinActiveTraceBo joinActiveTraceBo2_2 = new JoinActiveTraceBo("agent2", 1, (short)2, 200, 60, "agent2", 400, "agent2", 1498462550000L);
+        JoinActiveTraceBo joinActiveTraceBo2_3 = new JoinActiveTraceBo("agent3", 1, (short)2, 500, 10, "agent3", 100, "agent3", 1498462555000L);
+        JoinActiveTraceBo joinActiveTraceBo2_4 = new JoinActiveTraceBo("agent3", 1, (short)2, 400, 60, "agent3", 500, "agent3", 1498462560000L);
+        joinActiveTraceBoList2.add(joinActiveTraceBo2_1);
+        joinActiveTraceBoList2.add(joinActiveTraceBo2_2);
+        joinActiveTraceBoList2.add(joinActiveTraceBo2_3);
+        joinActiveTraceBoList2.add(joinActiveTraceBo2_4);
+        JoinApplicationStatBo joinApplicationStatBo2 = new JoinApplicationStatBo();
+        joinApplicationStatBo2.setId("test_app");
+        joinApplicationStatBo2.setJoinActiveTraceBoList(joinActiveTraceBoList2);
+        joinApplicationStatBo2.setTimestamp(1498462545000L);
+        joinApplicationStatBoList.add(joinApplicationStatBo2);
+
+        List<JoinActiveTraceBo> joinActiveTraceBoList3 = new ArrayList<JoinActiveTraceBo>();
+        JoinActiveTraceBo joinActiveTraceBo3_1 = new JoinActiveTraceBo("agent1", 1, (short)2, 150, 20, "agent1", 230, "agent1", 1498462545000L);
+        JoinActiveTraceBo joinActiveTraceBo3_2 = new JoinActiveTraceBo("agent2", 1, (short)2, 300, 10, "agent2", 400, "agent2", 1498462550000L);
+        JoinActiveTraceBo joinActiveTraceBo3_3 = new JoinActiveTraceBo("agent3", 1, (short)2, 30, 5, "agent3", 100, "agent3", 1498462565000L);
+        joinActiveTraceBoList3.add(joinActiveTraceBo3_1);
+        joinActiveTraceBoList3.add(joinActiveTraceBo3_2);
+        joinActiveTraceBoList3.add(joinActiveTraceBo3_3);
+        JoinApplicationStatBo joinApplicationStatBo3 = new JoinApplicationStatBo();
+        joinApplicationStatBo3.setId("test_app");
+        joinApplicationStatBo3.setJoinActiveTraceBoList(joinActiveTraceBoList3);
+        joinApplicationStatBo3.setTimestamp(1498462545000L);
+        joinApplicationStatBoList.add(joinApplicationStatBo3);
+
+        JoinApplicationStatBo joinApplicationStatBo = JoinApplicationStatBo.joinApplicationStatBoByTimeSlice(joinApplicationStatBoList);
+        assertEquals(joinApplicationStatBo.getId(), "test_app");
+        assertEquals(joinApplicationStatBo.getTimestamp(), 1498462545000L);
+        List<JoinActiveTraceBo> joinActiveTraceBoList = joinApplicationStatBo.getJoinActiveTraceBoList();
+        Collections.sort(joinActiveTraceBoList, new ComparatorImpl4());
+        assertEquals(joinActiveTraceBoList.size(), 5);
+        assertEquals(joinActiveTraceBoList.get(0).getTotalCount(), 100);
+        assertEquals(joinActiveTraceBoList.get(1).getTotalCount(), 200);
+        assertEquals(joinActiveTraceBoList.get(2).getTotalCount(), 300);
+        assertEquals(joinActiveTraceBoList.get(3).getTotalCount(), 400);
+        assertEquals(joinActiveTraceBoList.get(4).getTotalCount(), 30);
+    }
+
+    private class ComparatorImpl4 implements Comparator<JoinActiveTraceBo> {
+        @Override
+        public int compare(JoinActiveTraceBo bo1, JoinActiveTraceBo bo2) {
+            return bo1.getTimestamp() < bo2.getTimestamp() ? -1 : 1;
+        }
+    }
+
+    private JoinApplicationStatBo createJoinApplicationStatBo4(final String id, final long timestamp, final int plus) {
+        final JoinApplicationStatBo joinApplicationStatBo = new JoinApplicationStatBo();
+        joinApplicationStatBo.setId(id);
+        joinApplicationStatBo.setJoinActiveTraceBoList(createJoinActiveTraceBoList(id, timestamp, plus));
+        joinApplicationStatBo.setTimestamp(timestamp);
+        joinApplicationStatBo.setStatType(StatType.APP_STST);
+        return joinApplicationStatBo;
+    }
+
+    private List<JoinActiveTraceBo> createJoinActiveTraceBoList(final String id, final long currentTime, int plus) {
+        final List<JoinActiveTraceBo> joinActiveTraceBoList = new ArrayList<JoinActiveTraceBo>();
+        JoinActiveTraceBo joinActiveTraceBo1 = new JoinActiveTraceBo(id, 1, (short)2, 100 + plus, 60 + plus, id + "_1", 200 + plus, id + "_2", currentTime);
+        JoinActiveTraceBo joinActiveTraceBo2 = new JoinActiveTraceBo(id, 1, (short)2, 300 + plus, 150 + plus, id + "_1", 400 + plus, id + "_2", currentTime + 5000);
+        JoinActiveTraceBo joinActiveTraceBo3 = new JoinActiveTraceBo(id, 1, (short)2, 200 + plus, 130 + plus, id + "_1", 300 + plus, id + "_2", currentTime + 10000);
+        JoinActiveTraceBo joinActiveTraceBo4 = new JoinActiveTraceBo(id, 1, (short)2, 400 + plus, 200 + plus, id + "_1", 450 + plus, id + "_2", currentTime + 15000);
+        JoinActiveTraceBo joinActiveTraceBo5 = new JoinActiveTraceBo(id, 1, (short)2, 350 + plus, 170 + plus, id + "_1", 600 + plus, id + "_2", currentTime + 20000);
+
+        joinActiveTraceBoList.add(joinActiveTraceBo1);
+        joinActiveTraceBoList.add(joinActiveTraceBo2);
+        joinActiveTraceBoList.add(joinActiveTraceBo3);
+        joinActiveTraceBoList.add(joinActiveTraceBo4);
+        joinActiveTraceBoList.add(joinActiveTraceBo5);
+
+        return joinActiveTraceBoList;
+    }
+
+    private void assertJoinActiveTraceBoList(List<JoinActiveTraceBo> joinActiveTraceBoList) {
+        assertEquals(joinActiveTraceBoList.size(), 5);
+
+        JoinActiveTraceBo joinActiveTraceBo1 = joinActiveTraceBoList.get(0);
+        assertEquals(joinActiveTraceBo1.getId(), "id1");
+        assertEquals(joinActiveTraceBo1.getTimestamp(), 1487149800000L);
+        assertEquals(joinActiveTraceBo1.getHistogramSchemaType(), 1);
+        assertEquals(joinActiveTraceBo1.getVersion(), 2);
+        assertEquals(joinActiveTraceBo1.getTotalCount(), 86);
+        assertEquals(joinActiveTraceBo1.getMinTotalCount(), 10);
+        assertEquals(joinActiveTraceBo1.getMinTotalCountAgentId(), "id5_1");
+        assertEquals(joinActiveTraceBo1.getMaxTotalCount(), 240);
+        assertEquals(joinActiveTraceBo1.getMaxTotalCountAgentId(), "id4_2");
+
+        JoinActiveTraceBo joinActiveTraceBo2 = joinActiveTraceBoList.get(1);
+        assertEquals(joinActiveTraceBo2.getId(), "id1");
+        assertEquals(joinActiveTraceBo2.getTimestamp(), 1487149805000L);
+        assertEquals(joinActiveTraceBo2.getHistogramSchemaType(), 1);
+        assertEquals(joinActiveTraceBo2.getVersion(), 2);
+        assertEquals(joinActiveTraceBo2.getTotalCount(), 286);
+        assertEquals(joinActiveTraceBo2.getMinTotalCount(), 100);
+        assertEquals(joinActiveTraceBo2.getMinTotalCountAgentId(), "id5_1");
+        assertEquals(joinActiveTraceBo2.getMaxTotalCount(), 440);
+        assertEquals(joinActiveTraceBo2.getMaxTotalCountAgentId(), "id4_2");
+
+        JoinActiveTraceBo joinActiveTraceBo3 = joinActiveTraceBoList.get(2);
+        assertEquals(joinActiveTraceBo3.getId(), "id1");
+        assertEquals(joinActiveTraceBo3.getTimestamp(), 1487149810000L);
+        assertEquals(joinActiveTraceBo3.getHistogramSchemaType(), 1);
+        assertEquals(joinActiveTraceBo3.getVersion(), 2);
+        assertEquals(joinActiveTraceBo3.getTotalCount(), 186);
+        assertEquals(joinActiveTraceBo3.getMinTotalCount(), 80);
+        assertEquals(joinActiveTraceBo3.getMinTotalCountAgentId(), "id5_1");
+        assertEquals(joinActiveTraceBo3.getMaxTotalCount(), 340);
+        assertEquals(joinActiveTraceBo3.getMaxTotalCountAgentId(), "id4_2");
+
+        JoinActiveTraceBo joinActiveTraceBo4 = joinActiveTraceBoList.get(3);
+        assertEquals(joinActiveTraceBo4.getId(), "id1");
+        assertEquals(joinActiveTraceBo4.getTimestamp(), 1487149815000L);
+        assertEquals(joinActiveTraceBo4.getHistogramSchemaType(), 1);
+        assertEquals(joinActiveTraceBo4.getVersion(), 2);
+        assertEquals(joinActiveTraceBo4.getTotalCount(), 386);
+        assertEquals(joinActiveTraceBo4.getMinTotalCount(), 150);
+        assertEquals(joinActiveTraceBo4.getMinTotalCountAgentId(), "id5_1");
+        assertEquals(joinActiveTraceBo4.getMaxTotalCount(), 490);
+        assertEquals(joinActiveTraceBo4.getMaxTotalCountAgentId(), "id4_2");
+
+        JoinActiveTraceBo joinActiveTraceBo5 = joinActiveTraceBoList.get(4);
+        assertEquals(joinActiveTraceBo5.getId(), "id1");
+        assertEquals(joinActiveTraceBo5.getTimestamp(), 1487149820000L);
+        assertEquals(joinActiveTraceBo5.getHistogramSchemaType(), 1);
+        assertEquals(joinActiveTraceBo5.getVersion(), 2);
+        assertEquals(joinActiveTraceBo5.getTotalCount(), 336);
+        assertEquals(joinActiveTraceBo5.getMinTotalCount(), 120);
+        assertEquals(joinActiveTraceBo5.getMinTotalCountAgentId(), "id5_1");
+        assertEquals(joinActiveTraceBo5.getMaxTotalCount(), 640);
+        assertEquals(joinActiveTraceBo5.getMaxTotalCountAgentId(), "id4_2");
+    }
+
+    @Test
+    public void joinApplicationStatBoByTimeSlice9Test() {
+        final long currentTime = 1487149800000L; // 18:10:00 15 2 2017
+        List<JoinApplicationStatBo> joinApplicationStatBoList = new ArrayList<JoinApplicationStatBo>();
+        joinApplicationStatBoList.add(createJoinApplicationStatBo5("id1", currentTime, 10));
+        joinApplicationStatBoList.add(createJoinApplicationStatBo5("id2", currentTime + 1000, -40));
+        joinApplicationStatBoList.add(createJoinApplicationStatBo5("id3", currentTime + 2000, -30));
+        joinApplicationStatBoList.add(createJoinApplicationStatBo5("id4", currentTime + 3000, 40));
+        joinApplicationStatBoList.add(createJoinApplicationStatBo5("id5", currentTime + 4000, -50));
+        JoinApplicationStatBo resultJoinApplicationStatBo = JoinApplicationStatBo.joinApplicationStatBoByTimeSlice(joinApplicationStatBoList);
+        List<JoinResponseTimeBo> joinResponseTimeBoList = resultJoinApplicationStatBo.getJoinResponseTimeBoList();
+        Collections.sort(joinResponseTimeBoList, new ComparatorImpl5());
+
+        assertJoinResponseTimeBoList(joinResponseTimeBoList);
+    }
+
+    @Test
+    public void joinApplicationStatBoByTimeSlice10Test() {
+        List<JoinApplicationStatBo> joinApplicationStatBoList = new ArrayList<JoinApplicationStatBo>();
+
+        List<JoinResponseTimeBo> joinResponseTimeBoList1 = new ArrayList<JoinResponseTimeBo>();
+        JoinResponseTimeBo joinResponseTimeBo1_1 = new JoinResponseTimeBo("agent1", 1498462545000L, 100, 60, "agent1", 200, "agent1");
+        JoinResponseTimeBo joinResponseTimeBo1_2 = new JoinResponseTimeBo("agent1", 1498462550000L, 100, 60, "agent1", 200, "agent1");
+        JoinResponseTimeBo joinResponseTimeBo1_3 = new JoinResponseTimeBo("agent1", 1498462555000L, 100, 60, "agent1", 200, "agent1");
+        joinResponseTimeBoList1.add(joinResponseTimeBo1_1);
+        joinResponseTimeBoList1.add(joinResponseTimeBo1_2);
+        joinResponseTimeBoList1.add(joinResponseTimeBo1_3);
+        JoinApplicationStatBo joinApplicationStatBo1 = new JoinApplicationStatBo();
+        joinApplicationStatBo1.setId("test_app");
+        joinApplicationStatBo1.setJoinResponseTimeBoList(joinResponseTimeBoList1);
+        joinApplicationStatBo1.setTimestamp(1498462545000L);
+        joinApplicationStatBoList.add(joinApplicationStatBo1);
+
+        List<JoinResponseTimeBo> joinResponseTimeBoList2 = new ArrayList<JoinResponseTimeBo>();
+        JoinResponseTimeBo joinResponseTimeBo2_1 = new JoinResponseTimeBo("agent1", 1498462545000L, 50, 20, "agent1", 230, "agent1");
+        JoinResponseTimeBo joinResponseTimeBo2_2 = new JoinResponseTimeBo("agent2", 1498462550000L, 200, 60, "agent2", 400, "agent2");
+        JoinResponseTimeBo joinResponseTimeBo2_3 = new JoinResponseTimeBo("agent3", 1498462555000L, 500, 10, "agent3", 100, "agent3");
+        JoinResponseTimeBo joinResponseTimeBo2_4 = new JoinResponseTimeBo("agent3", 1498462560000L, 400, 60, "agent3", 500, "agent3");
+        joinResponseTimeBoList2.add(joinResponseTimeBo2_1);
+        joinResponseTimeBoList2.add(joinResponseTimeBo2_2);
+        joinResponseTimeBoList2.add(joinResponseTimeBo2_3);
+        joinResponseTimeBoList2.add(joinResponseTimeBo2_4);
+        JoinApplicationStatBo joinApplicationStatBo2 = new JoinApplicationStatBo();
+        joinApplicationStatBo2.setId("test_app");
+        joinApplicationStatBo2.setJoinResponseTimeBoList(joinResponseTimeBoList2);
+        joinApplicationStatBo2.setTimestamp(1498462545000L);
+        joinApplicationStatBoList.add(joinApplicationStatBo2);
+
+        List<JoinResponseTimeBo> joinResponseTimeBoList3 = new ArrayList<JoinResponseTimeBo>();
+        JoinResponseTimeBo joinResponseTimeBo3_1 = new JoinResponseTimeBo("agent1", 1498462545000L, 150, 20, "agent1", 230, "agent1");
+        JoinResponseTimeBo joinResponseTimeBo3_2 = new JoinResponseTimeBo("agent2", 1498462550000L, 300, 10, "agent2", 400, "agent2");
+        JoinResponseTimeBo joinResponseTimeBo3_3 = new JoinResponseTimeBo("agent3", 1498462565000L, 30, 5, "agent3", 100, "agent3");
+        joinResponseTimeBoList3.add(joinResponseTimeBo3_1);
+        joinResponseTimeBoList3.add(joinResponseTimeBo3_2);
+        joinResponseTimeBoList3.add(joinResponseTimeBo3_3);
+        JoinApplicationStatBo joinApplicationStatBo3 = new JoinApplicationStatBo();
+        joinApplicationStatBo3.setId("test_app");
+        joinApplicationStatBo3.setJoinResponseTimeBoList(joinResponseTimeBoList3);
+        joinApplicationStatBo3.setTimestamp(1498462545000L);
+        joinApplicationStatBoList.add(joinApplicationStatBo3);
+
+        JoinApplicationStatBo joinApplicationStatBo = JoinApplicationStatBo.joinApplicationStatBoByTimeSlice(joinApplicationStatBoList);
+        assertEquals(joinApplicationStatBo.getId(), "test_app");
+        assertEquals(joinApplicationStatBo.getTimestamp(), 1498462545000L);
+        List<JoinResponseTimeBo> joinResponseTimeBoList = joinApplicationStatBo.getJoinResponseTimeBoList();
+        Collections.sort(joinResponseTimeBoList, new ComparatorImpl5());
+        assertEquals(joinResponseTimeBoList.size(), 5);
+        assertEquals(joinResponseTimeBoList.get(0).getAvg(), 100);
+        assertEquals(joinResponseTimeBoList.get(1).getAvg(), 200);
+        assertEquals(joinResponseTimeBoList.get(2).getAvg(), 300);
+        assertEquals(joinResponseTimeBoList.get(3).getAvg(), 400);
+        assertEquals(joinResponseTimeBoList.get(4).getAvg(), 30);
+    }
+
+    private void assertJoinResponseTimeBoList(List<JoinResponseTimeBo> joinResponseTimeBoList) {
+        assertEquals(joinResponseTimeBoList.size(), 5);
+
+        JoinResponseTimeBo joinResponseTimeBo1 = joinResponseTimeBoList.get(0);
+        assertEquals(joinResponseTimeBo1.getId(), "id1");
+        assertEquals(joinResponseTimeBo1.getTimestamp(), 1487149800000L);
+        assertEquals(joinResponseTimeBo1.getAvg(), 286);
+        assertEquals(joinResponseTimeBo1.getMinAvg(), 150);
+        assertEquals(joinResponseTimeBo1.getMinAvgAgentId(), "id5_1");
+        assertEquals(joinResponseTimeBo1.getMaxAvg(), 6040);
+        assertEquals(joinResponseTimeBo1.getMaxAvgAgentId(), "id4_2");
+
+        JoinResponseTimeBo joinResponseTimeBo2 = joinResponseTimeBoList.get(1);
+        assertEquals(joinResponseTimeBo2.getId(), "id1");
+        assertEquals(joinResponseTimeBo2.getTimestamp(), 1487149805000L);
+        assertEquals(joinResponseTimeBo2.getAvg(), 186);
+        assertEquals(joinResponseTimeBo2.getMinAvg(), 0);
+        assertEquals(joinResponseTimeBo2.getMinAvgAgentId(), "id5_1");
+        assertEquals(joinResponseTimeBo2.getMaxAvg(), 7040);
+        assertEquals(joinResponseTimeBo2.getMaxAvgAgentId(), "id4_2");
+
+        JoinResponseTimeBo joinResponseTimeBo3 = joinResponseTimeBoList.get(2);
+        assertEquals(joinResponseTimeBo3.getId(), "id1");
+        assertEquals(joinResponseTimeBo3.getTimestamp(), 1487149810000L);
+        assertEquals(joinResponseTimeBo3.getAvg(), 386);
+        assertEquals(joinResponseTimeBo3.getMinAvg(), 250);
+        assertEquals(joinResponseTimeBo3.getMinAvgAgentId(), "id5_1");
+        assertEquals(joinResponseTimeBo3.getMaxAvg(), 8040);
+        assertEquals(joinResponseTimeBo3.getMaxAvgAgentId(), "id4_2");
+
+        JoinResponseTimeBo joinResponseTimeBo4 = joinResponseTimeBoList.get(3);
+        assertEquals(joinResponseTimeBo4.getId(), "id1");
+        assertEquals(joinResponseTimeBo4.getTimestamp(), 1487149815000L);
+        assertEquals(joinResponseTimeBo4.getAvg(), 486);
+        assertEquals(joinResponseTimeBo4.getMinAvg(), 350);
+        assertEquals(joinResponseTimeBo4.getMinAvgAgentId(), "id5_1");
+        assertEquals(joinResponseTimeBo4.getMaxAvg(), 2040);
+        assertEquals(joinResponseTimeBo4.getMaxAvgAgentId(), "id4_2");
+
+        JoinResponseTimeBo joinResponseTimeBo5 = joinResponseTimeBoList.get(4);
+        assertEquals(joinResponseTimeBo5.getId(), "id1");
+        assertEquals(joinResponseTimeBo5.getTimestamp(), 1487149820000L);
+        assertEquals(joinResponseTimeBo5.getAvg(), 86);
+        assertEquals(joinResponseTimeBo5.getMinAvg(), 50);
+        assertEquals(joinResponseTimeBo5.getMinAvgAgentId(), "id5_1");
+        assertEquals(joinResponseTimeBo5.getMaxAvg(), 9040);
+        assertEquals(joinResponseTimeBo5.getMaxAvgAgentId(), "id4_2");
+    }
+
+    private class ComparatorImpl5 implements Comparator<JoinResponseTimeBo> {
+        @Override
+        public int compare(JoinResponseTimeBo bo1, JoinResponseTimeBo bo2) {
+            return bo1.getTimestamp() < bo2.getTimestamp() ? -1 : 1;
+        }
+    }
+
+    private JoinApplicationStatBo createJoinApplicationStatBo5(final String id, final long timestamp, final int plus) {
+        final JoinApplicationStatBo joinApplicationStatBo = new JoinApplicationStatBo();
+        joinApplicationStatBo.setId(id);
+        joinApplicationStatBo.setJoinResponseTimeBoList(createJoinResponseTimeList(id, timestamp, plus));
+        joinApplicationStatBo.setTimestamp(timestamp);
+        joinApplicationStatBo.setStatType(StatType.APP_STST);
+        return joinApplicationStatBo;
+    }
+
+    private List<JoinResponseTimeBo> createJoinResponseTimeList(String id, long currentTime, int plus) {
+        final List<JoinResponseTimeBo> joinResponseTimeBoList = new ArrayList<JoinResponseTimeBo>();
+        JoinResponseTimeBo joinResponseTimeBo1 = new JoinResponseTimeBo(id, currentTime, 300 + plus, 200 + plus, id + "_1", 6000 + plus, id + "_2");
+        JoinResponseTimeBo joinResponseTimeBo2 = new JoinResponseTimeBo(id, currentTime + 5000, 200 + plus, 50 + plus, id + "_1", 7000 + plus, id + "_2");
+        JoinResponseTimeBo joinResponseTimeBo3 = new JoinResponseTimeBo(id, currentTime + 10000, 400 + plus, 300 + plus, id + "_1", 8000 + plus, id + "_2");
+        JoinResponseTimeBo joinResponseTimeBo4 = new JoinResponseTimeBo(id, currentTime + 15000, 500 + plus, 400 + plus, id + "_1", 2000 + plus, id + "_2");
+        JoinResponseTimeBo joinResponseTimeBo5 = new JoinResponseTimeBo(id, currentTime + 20000, 100 + plus, 100 + plus, id + "_1", 9000 + plus, id + "_2");
+        joinResponseTimeBoList.add(joinResponseTimeBo1);
+        joinResponseTimeBoList.add(joinResponseTimeBo2);
+        joinResponseTimeBoList.add(joinResponseTimeBo3);
+        joinResponseTimeBoList.add(joinResponseTimeBo4);
+        joinResponseTimeBoList.add(joinResponseTimeBo5);
+
+        return joinResponseTimeBoList;
+    }
+
+    @Test
+    public void joinApplicationStatBoByTimeSlice11Test() {
+        final long currentTime = 1487149800000L; // 18:10:00 15 2 2017
+        List<JoinApplicationStatBo> joinApplicationStatBoList = new ArrayList<JoinApplicationStatBo>();
+        joinApplicationStatBoList.add(createJoinApplicationStatBo6("id1", currentTime, 10));
+        joinApplicationStatBoList.add(createJoinApplicationStatBo6("id2", currentTime + 1000, -40));
+        joinApplicationStatBoList.add(createJoinApplicationStatBo6("id3", currentTime + 2000, -30));
+        joinApplicationStatBoList.add(createJoinApplicationStatBo6("id4", currentTime + 3000, 40));
+        joinApplicationStatBoList.add(createJoinApplicationStatBo6("id5", currentTime + 4000, -50));
+        JoinApplicationStatBo resultJoinApplicationStatBo = JoinApplicationStatBo.joinApplicationStatBoByTimeSlice(joinApplicationStatBoList);
+        List<JoinDataSourceListBo> joinDataSourceListBoList = resultJoinApplicationStatBo.getJoinDataSourceListBoList();
+        Collections.sort(joinDataSourceListBoList, new ComparatorImpl6());
+
+        assertJoinDataSourceListBoList(joinDataSourceListBoList);
+    }
+
+    @Test
+    public void joinApplicationStatBoByTimeSlice12Test() {
+        List<JoinApplicationStatBo> joinApplicationStatBoList = new ArrayList<JoinApplicationStatBo>();
+
+        List<JoinDataSourceListBo> joinDataSourceLIstBoList1 = new ArrayList<JoinDataSourceListBo>();
+        List<JoinDataSourceBo> joinDataSourceBoList1 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList1.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 100, 60, "agent1", 200, "agent1"));
+        JoinDataSourceListBo joinDataSourceListBo1_1 = new JoinDataSourceListBo("agent1", joinDataSourceBoList1, 1498462545000L);
+        JoinDataSourceListBo joinDataSourceListBo1_2 = new JoinDataSourceListBo("agent1", joinDataSourceBoList1, 1498462550000L);
+        JoinDataSourceListBo joinDataSourceListBo1_3 = new JoinDataSourceListBo("agent1", joinDataSourceBoList1, 1498462555000L);
+        joinDataSourceLIstBoList1.add(joinDataSourceListBo1_1);
+        joinDataSourceLIstBoList1.add(joinDataSourceListBo1_2);
+        joinDataSourceLIstBoList1.add(joinDataSourceListBo1_3);
+        JoinApplicationStatBo joinApplicationStatBo1 = new JoinApplicationStatBo();
+        joinApplicationStatBo1.setId("test_app");
+        joinApplicationStatBo1.setJoinDataSourceListBoList(joinDataSourceLIstBoList1);
+        joinApplicationStatBo1.setTimestamp(1498462545000L);
+        joinApplicationStatBoList.add(joinApplicationStatBo1);
+
+        List<JoinDataSourceListBo> joinDataSourceLIstBoList2 = new ArrayList<JoinDataSourceListBo>();
+        List<JoinDataSourceBo> joinDataSourceBoList2_1 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList2_1.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 50, 20, "agent1", 230, "agent1"));
+        JoinDataSourceListBo joinResponseTimeBo2_1 = new JoinDataSourceListBo("agent1", joinDataSourceBoList2_1, 1498462545000L);
+        List<JoinDataSourceBo> joinDataSourceBoList2_2 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList2_2.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 200, 60, "agent2", 400, "agent2"));
+        JoinDataSourceListBo joinResponseTimeBo2_2 = new JoinDataSourceListBo("agent2", joinDataSourceBoList2_2, 1498462550000L);
+        List<JoinDataSourceBo> joinDataSourceBoList2_3 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList2_3.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 500, 10, "agent3", 100, "agent3"));
+        JoinDataSourceListBo joinResponseTimeBo2_3 = new JoinDataSourceListBo("agent3", joinDataSourceBoList2_3, 1498462555000L);
+        List<JoinDataSourceBo> joinDataSourceBoList2_4 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList2_4.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 400, 60, "agent3", 500, "agent3"));
+        JoinDataSourceListBo joinResponseTimeBo2_4 = new JoinDataSourceListBo("agent3", joinDataSourceBoList2_4, 1498462560000L);
+        joinDataSourceLIstBoList2.add(joinResponseTimeBo2_1);
+        joinDataSourceLIstBoList2.add(joinResponseTimeBo2_2);
+        joinDataSourceLIstBoList2.add(joinResponseTimeBo2_3);
+        joinDataSourceLIstBoList2.add(joinResponseTimeBo2_4);
+        JoinApplicationStatBo joinApplicationStatBo2 = new JoinApplicationStatBo();
+        joinApplicationStatBo2.setId("test_app");
+        joinApplicationStatBo2.setJoinDataSourceListBoList(joinDataSourceLIstBoList2);
+        joinApplicationStatBo2.setTimestamp(1498462545000L);
+        joinApplicationStatBoList.add(joinApplicationStatBo2);
+
+        List<JoinDataSourceListBo> joinResponseTimeBoList3 = new ArrayList<JoinDataSourceListBo>();
+        List<JoinDataSourceBo> joinDataSourceBoList3_1 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList3_1.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 150, 20, "agent1", 230, "agent1"));
+        JoinDataSourceListBo joinResponseTimeBo3_1 = new JoinDataSourceListBo("agent1", joinDataSourceBoList3_1, 1498462545000L);
+        List<JoinDataSourceBo> joinDataSourceBoList3_2 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList3_2.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 300, 10, "agent2", 400, "agent2"));
+        JoinDataSourceListBo joinResponseTimeBo3_2 = new JoinDataSourceListBo("agent2", joinDataSourceBoList3_2, 1498462550000L);
+        List<JoinDataSourceBo> joinDataSourceBoList3_3 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList3_3.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 30, 5, "agent2", 100, "agent2"));
+        JoinDataSourceListBo joinResponseTimeBo3_3 = new JoinDataSourceListBo("agent3", joinDataSourceBoList3_3, 1498462565000L);
+        joinResponseTimeBoList3.add(joinResponseTimeBo3_1);
+        joinResponseTimeBoList3.add(joinResponseTimeBo3_2);
+        joinResponseTimeBoList3.add(joinResponseTimeBo3_3);
+        JoinApplicationStatBo joinApplicationStatBo3 = new JoinApplicationStatBo();
+        joinApplicationStatBo3.setId("test_app");
+        joinApplicationStatBo3.setJoinDataSourceListBoList(joinResponseTimeBoList3);
+        joinApplicationStatBo3.setTimestamp(1498462545000L);
+        joinApplicationStatBoList.add(joinApplicationStatBo3);
+
+        JoinApplicationStatBo joinApplicationStatBo = JoinApplicationStatBo.joinApplicationStatBoByTimeSlice(joinApplicationStatBoList);
+        assertEquals(joinApplicationStatBo.getId(), "test_app");
+        assertEquals(joinApplicationStatBo.getTimestamp(), 1498462545000L);
+        List<JoinDataSourceListBo> joinDataSourceListBoList = joinApplicationStatBo.getJoinDataSourceListBoList();
+        Collections.sort(joinDataSourceListBoList, new ComparatorImpl6());
+        assertEquals(joinDataSourceListBoList.size(), 5);
+        assertEquals(joinDataSourceListBoList.get(0).getJoinDataSourceBoList().get(0).getAvgActiveConnectionSize(), 100);
+        assertEquals(joinDataSourceListBoList.get(0).getJoinDataSourceBoList().size(), 1);
+        assertEquals(joinDataSourceListBoList.get(1).getJoinDataSourceBoList().get(0).getAvgActiveConnectionSize(), 200);
+        assertEquals(joinDataSourceListBoList.get(1).getJoinDataSourceBoList().size(), 1);
+        assertEquals(joinDataSourceListBoList.get(2).getJoinDataSourceBoList().get(0).getAvgActiveConnectionSize(), 300);
+        assertEquals(joinDataSourceListBoList.get(2).getJoinDataSourceBoList().size(), 1);
+        assertEquals(joinDataSourceListBoList.get(3).getJoinDataSourceBoList().get(0).getAvgActiveConnectionSize(), 400);
+        assertEquals(joinDataSourceListBoList.get(3).getJoinDataSourceBoList().size(), 1);
+        assertEquals(joinDataSourceListBoList.get(4).getJoinDataSourceBoList().get(0).getAvgActiveConnectionSize(), 30);
+        assertEquals(joinDataSourceListBoList.get(4).getJoinDataSourceBoList().size(), 1);
+    }
+
+    private void assertJoinDataSourceListBoList(List<JoinDataSourceListBo> joinDataSourceListBoList) {
+        assertEquals(joinDataSourceListBoList.size(), 5);
+
+        JoinDataSourceListBo joinDataSourceListBo1 = joinDataSourceListBoList.get(0);
+        assertEquals(joinDataSourceListBo1.getId(), "id1");
+        assertEquals(joinDataSourceListBo1.getTimestamp(), 1487149800000L);
+        List<JoinDataSourceBo> joinDataSourceBoList1 = joinDataSourceListBo1.getJoinDataSourceBoList();
+        assertEquals(joinDataSourceBoList1.size(), 2);
+        JoinDataSourceBo joinDataSourceBo1_1 = joinDataSourceBoList1.get(0);
+        assertEquals(joinDataSourceBo1_1.getServiceTypeCode(), 1000);
+        assertEquals(joinDataSourceBo1_1.getUrl(), "jdbc:mysql");
+        assertEquals(joinDataSourceBo1_1.getAvgActiveConnectionSize(), 286);
+        assertEquals(joinDataSourceBo1_1.getMinActiveConnectionSize(), 200);
+        assertEquals(joinDataSourceBo1_1.getMinActiveConnectionAgentId(), "agent_id_1_-50");
+        assertEquals(joinDataSourceBo1_1.getMaxActiveConnectionSize(), 640);
+        assertEquals(joinDataSourceBo1_1.getMaxActiveConnectionAgentId(), "agent_id_6_40");
+        JoinDataSourceBo joinDataSourceBo1_2 = joinDataSourceBoList1.get(1);
+        assertEquals(joinDataSourceBo1_2.getServiceTypeCode(), 2000);
+        assertEquals(joinDataSourceBo1_2.getUrl(), "jdbc:mssql");
+        assertEquals(joinDataSourceBo1_2.getAvgActiveConnectionSize(), 386);
+        assertEquals(joinDataSourceBo1_2.getMinActiveConnectionSize(), 300);
+        assertEquals(joinDataSourceBo1_2.getMinActiveConnectionAgentId(), "agent_id_1_-50");
+        assertEquals(joinDataSourceBo1_2.getMaxActiveConnectionSize(), 740);
+        assertEquals(joinDataSourceBo1_2.getMaxActiveConnectionAgentId(), "agent_id_6_40");
+
+        JoinDataSourceListBo joinDataSourceListBo2 = joinDataSourceListBoList.get(1);
+        assertEquals(joinDataSourceListBo2.getId(), "id1");
+        assertEquals(joinDataSourceListBo2.getTimestamp(), 1487149805000L);
+        List<JoinDataSourceBo> joinDataSourceBoList2 = joinDataSourceListBo2.getJoinDataSourceBoList();
+        assertEquals(joinDataSourceBoList2.size(), 2);
+        JoinDataSourceBo joinDataSourceBo2_1 = joinDataSourceBoList2.get(0);
+        assertEquals(joinDataSourceBo2_1.getServiceTypeCode(), 1000);
+        assertEquals(joinDataSourceBo2_1.getUrl(), "jdbc:mysql");
+        assertEquals(joinDataSourceBo2_1.getAvgActiveConnectionSize(), 186);
+        assertEquals(joinDataSourceBo2_1.getMinActiveConnectionSize(), 0);
+        assertEquals(joinDataSourceBo2_1.getMinActiveConnectionAgentId(), "agent_id_2_-50");
+        assertEquals(joinDataSourceBo2_1.getMaxActiveConnectionSize(), 740);
+        assertEquals(joinDataSourceBo2_1.getMaxActiveConnectionAgentId(), "agent_id_7_40");
+        JoinDataSourceBo joinDataSourceBo2_2 = joinDataSourceBoList2.get(1);
+        assertEquals(joinDataSourceBo2_2.getServiceTypeCode(), 2000);
+        assertEquals(joinDataSourceBo2_2.getUrl(), "jdbc:mssql");
+        assertEquals(joinDataSourceBo2_2.getAvgActiveConnectionSize(), 286);
+        assertEquals(joinDataSourceBo2_2.getMinActiveConnectionSize(), 100);
+        assertEquals(joinDataSourceBo2_2.getMinActiveConnectionAgentId(), "agent_id_2_-50");
+        assertEquals(joinDataSourceBo2_2.getMaxActiveConnectionSize(), 840);
+        assertEquals(joinDataSourceBo2_2.getMaxActiveConnectionAgentId(), "agent_id_7_40");
+
+        JoinDataSourceListBo joinDataSourceListBo3 = joinDataSourceListBoList.get(2);
+        assertEquals(joinDataSourceListBo3.getId(), "id1");
+        assertEquals(joinDataSourceListBo3.getTimestamp(), 1487149810000L);
+        List<JoinDataSourceBo> joinDataSourceBoList3 = joinDataSourceListBo3.getJoinDataSourceBoList();
+        assertEquals(joinDataSourceBoList3.size(), 2);
+        JoinDataSourceBo joinDataSourceBo3_1 = joinDataSourceBoList3.get(0);
+        assertEquals(joinDataSourceBo3_1.getServiceTypeCode(), 1000);
+        assertEquals(joinDataSourceBo3_1.getUrl(), "jdbc:mysql");
+        assertEquals(joinDataSourceBo3_1.getAvgActiveConnectionSize(), 486);
+        assertEquals(joinDataSourceBo3_1.getMinActiveConnectionSize(), 100);
+        assertEquals(joinDataSourceBo3_1.getMinActiveConnectionAgentId(), "agent_id_3_-50");
+        assertEquals(joinDataSourceBo3_1.getMaxActiveConnectionSize(), 940);
+        assertEquals(joinDataSourceBo3_1.getMaxActiveConnectionAgentId(), "agent_id_8_40");
+        JoinDataSourceBo joinDataSourceBo3_2 = joinDataSourceBoList3.get(1);
+        assertEquals(joinDataSourceBo3_2.getServiceTypeCode(), 2000);
+        assertEquals(joinDataSourceBo3_2.getUrl(), "jdbc:mssql");
+        assertEquals(joinDataSourceBo3_2.getAvgActiveConnectionSize(), 586);
+        assertEquals(joinDataSourceBo3_2.getMinActiveConnectionSize(), 200);
+        assertEquals(joinDataSourceBo3_2.getMinActiveConnectionAgentId(), "agent_id_3_-50");
+        assertEquals(joinDataSourceBo3_2.getMaxActiveConnectionSize(), 1040);
+        assertEquals(joinDataSourceBo3_2.getMaxActiveConnectionAgentId(), "agent_id_8_40");
+
+        JoinDataSourceListBo joinDataSourceListBo4 = joinDataSourceListBoList.get(3);
+        assertEquals(joinDataSourceListBo4.getId(), "id1");
+        assertEquals(joinDataSourceListBo4.getTimestamp(), 1487149815000L);
+        List<JoinDataSourceBo> joinDataSourceBoList4 = joinDataSourceListBo4.getJoinDataSourceBoList();
+        assertEquals(joinDataSourceBoList4.size(), 2);
+        JoinDataSourceBo joinDataSourceBo4_1 = joinDataSourceBoList4.get(0);
+        assertEquals(joinDataSourceBo4_1.getServiceTypeCode(), 1000);
+        assertEquals(joinDataSourceBo4_1.getUrl(), "jdbc:mysql");
+        assertEquals(joinDataSourceBo4_1.getAvgActiveConnectionSize(), 386);
+        assertEquals(joinDataSourceBo4_1.getMinActiveConnectionSize(), 500);
+        assertEquals(joinDataSourceBo4_1.getMinActiveConnectionAgentId(), "agent_id_4_-50");
+        assertEquals(joinDataSourceBo4_1.getMaxActiveConnectionSize(), 640);
+        assertEquals(joinDataSourceBo4_1.getMaxActiveConnectionAgentId(), "agent_id_9_40");
+        JoinDataSourceBo joinDataSourceBo4_2 = joinDataSourceBoList4.get(1);
+        assertEquals(joinDataSourceBo4_2.getServiceTypeCode(), 2000);
+        assertEquals(joinDataSourceBo4_2.getUrl(), "jdbc:mssql");
+        assertEquals(joinDataSourceBo4_2.getAvgActiveConnectionSize(), 486);
+        assertEquals(joinDataSourceBo4_2.getMinActiveConnectionSize(), 600);
+        assertEquals(joinDataSourceBo4_2.getMinActiveConnectionAgentId(), "agent_id_4_-50");
+        assertEquals(joinDataSourceBo4_2.getMaxActiveConnectionSize(), 740);
+        assertEquals(joinDataSourceBo4_2.getMaxActiveConnectionAgentId(), "agent_id_9_40");
+
+        JoinDataSourceListBo joinDataSourceListBo5 = joinDataSourceListBoList.get(4);
+        assertEquals(joinDataSourceListBo5.getId(), "id1");
+        assertEquals(joinDataSourceListBo5.getTimestamp(), 1487149820000L);
+        List<JoinDataSourceBo> joinDataSourceBoList5 = joinDataSourceListBo5.getJoinDataSourceBoList();
+        assertEquals(joinDataSourceBoList5.size(), 2);
+        JoinDataSourceBo joinDataSourceBo5_1 = joinDataSourceBoList5.get(0);
+        assertEquals(joinDataSourceBo5_1.getServiceTypeCode(), 1000);
+        assertEquals(joinDataSourceBo5_1.getUrl(), "jdbc:mysql");
+        assertEquals(joinDataSourceBo5_1.getAvgActiveConnectionSize(), 86);
+        assertEquals(joinDataSourceBo5_1.getMinActiveConnectionSize(), 700);
+        assertEquals(joinDataSourceBo5_1.getMinActiveConnectionAgentId(), "agent_id_5_-50");
+        assertEquals(joinDataSourceBo5_1.getMaxActiveConnectionSize(), 840);
+        assertEquals(joinDataSourceBo5_1.getMaxActiveConnectionAgentId(), "agent_id_10_40");
+        JoinDataSourceBo joinDataSourceBo5_2 = joinDataSourceBoList5.get(1);
+        assertEquals(joinDataSourceBo5_2.getServiceTypeCode(), 2000);
+        assertEquals(joinDataSourceBo5_2.getUrl(), "jdbc:mssql");
+        assertEquals(joinDataSourceBo5_2.getAvgActiveConnectionSize(), 186);
+        assertEquals(joinDataSourceBo5_2.getMinActiveConnectionSize(), 800);
+        assertEquals(joinDataSourceBo5_2.getMinActiveConnectionAgentId(), "agent_id_5_-50");
+        assertEquals(joinDataSourceBo5_2.getMaxActiveConnectionSize(), 940);
+        assertEquals(joinDataSourceBo5_2.getMaxActiveConnectionAgentId(), "agent_id_10_40");
+
+    }
+
+    private class ComparatorImpl6 implements Comparator<JoinDataSourceListBo> {
+        @Override
+        public int compare(JoinDataSourceListBo bo1, JoinDataSourceListBo bo2) {
+            return bo1.getTimestamp() < bo2.getTimestamp() ? -1 : 1;
+        }
+    }
+
+    private JoinApplicationStatBo createJoinApplicationStatBo6(final String id, final long timestamp, final int plus) {
+        final JoinApplicationStatBo joinApplicationStatBo = new JoinApplicationStatBo();
+        joinApplicationStatBo.setId(id);
+        joinApplicationStatBo.setJoinDataSourceListBoList(createJoinDataSourceListBoList(id, timestamp, plus));
+        joinApplicationStatBo.setTimestamp(timestamp);
+        joinApplicationStatBo.setStatType(StatType.APP_STST);
+        return joinApplicationStatBo;
+    }
+
+    private List<JoinDataSourceListBo> createJoinDataSourceListBoList(String id, long currentTime, int plus) {
+        final List<JoinDataSourceListBo> joinDataSourceListBoList = new ArrayList<JoinDataSourceListBo>();
+
+        List<JoinDataSourceBo> joinDataSourceBoList1 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList1.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 300 + plus, 250 + plus, "agent_id_1_" + plus, 600 + plus, "agent_id_6_" + plus));
+        joinDataSourceBoList1.add(new JoinDataSourceBo((short)2000, "jdbc:mssql", 400 + plus, 350 + plus, "agent_id_1_" + plus, 700 + plus, "agent_id_6_" + plus));
+        JoinDataSourceListBo joinDataSourceListBo1 = new JoinDataSourceListBo(id, joinDataSourceBoList1, currentTime);
+
+        List<JoinDataSourceBo> joinDataSourceBoList2 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList2.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 200 + plus, 50 + plus, "agent_id_2_" + plus, 700 + plus, "agent_id_7_" + plus));
+        joinDataSourceBoList2.add(new JoinDataSourceBo((short)2000, "jdbc:mssql", 300 + plus, 150 + plus, "agent_id_2_" + plus, 800 + plus, "agent_id_7_" + plus));
+        JoinDataSourceListBo joinDataSourceListBo2 = new JoinDataSourceListBo(id, joinDataSourceBoList2, currentTime + 5000);
+
+        List<JoinDataSourceBo> joinDataSourceBoList3 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList3.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 500 + plus, 150 + plus, "agent_id_3_" + plus, 900 + plus, "agent_id_8_" + plus));
+        joinDataSourceBoList3.add(new JoinDataSourceBo((short)2000, "jdbc:mssql", 600 + plus, 250 + plus, "agent_id_3_" + plus, 1000 + plus, "agent_id_8_" + plus));
+        JoinDataSourceListBo joinDataSourceListBo3 = new JoinDataSourceListBo(id, joinDataSourceBoList3, currentTime + 10000);
+
+        List<JoinDataSourceBo> joinDataSourceBoList4 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList4.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 400 + plus, 550 + plus, "agent_id_4_" + plus, 600 + plus, "agent_id_9_" + plus));
+        joinDataSourceBoList4.add(new JoinDataSourceBo((short)2000, "jdbc:mssql", 500 + plus, 650 + plus, "agent_id_4_" + plus, 700 + plus, "agent_id_9_" + plus));
+        JoinDataSourceListBo joinDataSourceListBo4 = new JoinDataSourceListBo(id, joinDataSourceBoList4, currentTime + 15000);
+
+        List<JoinDataSourceBo> joinDataSourceBoList5 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList5.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 100 + plus, 750 + plus, "agent_id_5_" + plus, 800 + plus, "agent_id_10_" + plus));
+        joinDataSourceBoList5.add(new JoinDataSourceBo((short)2000, "jdbc:mssql", 200 + plus, 850 + plus, "agent_id_5_" + plus, 900 + plus, "agent_id_10_" + plus));
+        JoinDataSourceListBo joinDataSourceListBo5 = new JoinDataSourceListBo(id, joinDataSourceBoList5, currentTime + 20000);
+
+        joinDataSourceListBoList.add(joinDataSourceListBo1);
+        joinDataSourceListBoList.add(joinDataSourceListBo2);
+        joinDataSourceListBoList.add(joinDataSourceListBo3);
+        joinDataSourceListBoList.add(joinDataSourceListBo4);
+        joinDataSourceListBoList.add(joinDataSourceListBo5);
+
+        return joinDataSourceListBoList;
+    }
+
+    @Test
     public void createJoinApplicationStatBoTest() {
         JoinAgentStatBo joinAgentStatBo = new JoinAgentStatBo();
         joinAgentStatBo.setTimestamp(1498462565000L);
@@ -593,6 +1171,67 @@ public class JoinApplicationStatBoTest {
         joinTransactionBoList.add(joinTransactionBo5);
         joinAgentStatBo.setJoinTransactionBoList(joinTransactionBoList);
 
+        List<JoinActiveTraceBo> JoinActiveTraceBoList = new ArrayList<JoinActiveTraceBo>();
+        JoinActiveTraceBo joinActiveTraceBo1 = new JoinActiveTraceBo("agent1", 1, (short)2, 30, 15, "app_1_1", 40, "app_1_2", 1498462565000L);
+        JoinActiveTraceBo joinActiveTraceBo2 = new JoinActiveTraceBo("agent1", 1, (short)2, 30, 15, "app_1_1", 40, "app_1_2", 1498462570000L);
+        JoinActiveTraceBo joinActiveTraceBo3 = new JoinActiveTraceBo("agent1", 1, (short)2, 30, 15, "app_1_1", 40, "app_1_2", 1498462575000L);
+        JoinActiveTraceBo joinActiveTraceBo4 = new JoinActiveTraceBo("agent1", 1, (short)2, 30, 15, "app_1_1", 40, "app_1_2", 1498462580000L);
+        JoinActiveTraceBo joinActiveTraceBo5 = new JoinActiveTraceBo("agent1", 1, (short)2, 30, 15, "app_1_1", 40, "app_1_2", 1498462585000L);
+        JoinActiveTraceBoList.add(joinActiveTraceBo1);
+        JoinActiveTraceBoList.add(joinActiveTraceBo2);
+        JoinActiveTraceBoList.add(joinActiveTraceBo3);
+        JoinActiveTraceBoList.add(joinActiveTraceBo4);
+        JoinActiveTraceBoList.add(joinActiveTraceBo5);
+        joinAgentStatBo.setJoinActiveTraceBoList(JoinActiveTraceBoList);
+
+        List<JoinResponseTimeBo> joinResponseTimeBoList = new ArrayList<JoinResponseTimeBo>();
+        JoinResponseTimeBo joinResponseTimeBo1 = new JoinResponseTimeBo("agent1", 1498462565000L, 3000, 2, "app_1_1", 6000, "app_1_2");
+        JoinResponseTimeBo joinResponseTimeBo2 = new JoinResponseTimeBo("agent1", 1498462570000L, 4000, 200, "app_2_1", 9000, "app_2_2");
+        JoinResponseTimeBo joinResponseTimeBo3 = new JoinResponseTimeBo("agent1", 1498462575000L, 2000, 20, "app_3_1", 7000, "app_3_2");
+        JoinResponseTimeBo joinResponseTimeBo4 = new JoinResponseTimeBo("agent1", 1498462580000L, 5000, 20, "app_4_1", 8000, "app_4_2");
+        JoinResponseTimeBo joinResponseTimeBo5 = new JoinResponseTimeBo("agent1", 1498462585000L, 1000, 10, "app_5_1", 6600, "app_5_2");
+        joinResponseTimeBoList.add(joinResponseTimeBo1);
+        joinResponseTimeBoList.add(joinResponseTimeBo2);
+        joinResponseTimeBoList.add(joinResponseTimeBo3);
+        joinResponseTimeBoList.add(joinResponseTimeBo4);
+        joinResponseTimeBoList.add(joinResponseTimeBo5);
+        joinAgentStatBo.setJoinResponseTimeBoList(joinResponseTimeBoList);
+
+        final List<JoinDataSourceListBo> joinDataSourceListBoList = new ArrayList<JoinDataSourceListBo>();
+
+        List<JoinDataSourceBo> joinDataSourceBoList1 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList1.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 300, 250, "agent_id_1", 600, "agent_id_6"));
+        joinDataSourceBoList1.add(new JoinDataSourceBo((short)2000, "jdbc:mssql", 400, 350, "agent_id_1", 700, "agent_id_6"));
+        JoinDataSourceListBo joinDataSourceListBo1 = new JoinDataSourceListBo("agent1", joinDataSourceBoList1, 1498462565000L);
+
+        List<JoinDataSourceBo> joinDataSourceBoList2 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList2.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 200, 50, "agent_id_2", 700, "agent_id_7"));
+        joinDataSourceBoList2.add(new JoinDataSourceBo((short)2000, "jdbc:mssql", 300, 150, "agent_id_2", 800, "agent_id_7"));
+        JoinDataSourceListBo joinDataSourceListBo2 = new JoinDataSourceListBo("agent1", joinDataSourceBoList2, 1498462570000L);
+
+        List<JoinDataSourceBo> joinDataSourceBoList3 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList3.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 500, 150, "agent_id_3", 900, "agent_id_8"));
+        joinDataSourceBoList3.add(new JoinDataSourceBo((short)2000, "jdbc:mssql", 600, 250, "agent_id_3", 1000, "agent_id_8"));
+        JoinDataSourceListBo joinDataSourceListBo3 = new JoinDataSourceListBo("agent1", joinDataSourceBoList3, 1498462575000L);
+
+        List<JoinDataSourceBo> joinDataSourceBoList4 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList4.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 400, 550, "agent_id_4", 600, "agent_id_9"));
+        joinDataSourceBoList4.add(new JoinDataSourceBo((short)2000, "jdbc:mssql", 500, 650, "agent_id_4", 700, "agent_id_9"));
+        JoinDataSourceListBo joinDataSourceListBo4 = new JoinDataSourceListBo("agent1", joinDataSourceBoList4, 1498462580000L);
+
+        List<JoinDataSourceBo> joinDataSourceBoList5 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList5.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 100, 750, "agent_id_5", 800, "agent_id_10"));
+        joinDataSourceBoList5.add(new JoinDataSourceBo((short)2000, "jdbc:mssql", 200, 850, "agent_id_5", 900, "agent_id_10"));
+        JoinDataSourceListBo joinDataSourceListBo5 = new JoinDataSourceListBo("agent1", joinDataSourceBoList5, 1498462585000L);
+
+        joinDataSourceListBoList.add(joinDataSourceListBo1);
+        joinDataSourceListBoList.add(joinDataSourceListBo2);
+        joinDataSourceListBoList.add(joinDataSourceListBo3);
+        joinDataSourceListBoList.add(joinDataSourceListBo4);
+        joinDataSourceListBoList.add(joinDataSourceListBo5);
+        joinAgentStatBo.setJoinDataSourceListBoList(joinDataSourceListBoList);
+
+
         List<JoinApplicationStatBo> joinApplicationStatBoList = JoinApplicationStatBo.createJoinApplicationStatBo("test_app", joinAgentStatBo, 60000);
         assertEquals(joinApplicationStatBoList.size(), 1);
         JoinApplicationStatBo joinApplicationStatBo = joinApplicationStatBoList.get(0);
@@ -600,6 +1239,9 @@ public class JoinApplicationStatBoTest {
         assertEquals(joinApplicationStatBo.getJoinCpuLoadBoList().size(), 5);
         assertEquals(joinApplicationStatBo.getJoinMemoryBoList().size(), 5);
         assertEquals(joinApplicationStatBo.getJoinTransactionBoList().size(), 5);
+        assertEquals(joinApplicationStatBo.getJoinActiveTraceBoList().size(), 5);
+        assertEquals(joinApplicationStatBo.getJoinResponseTimeBoList().size(), 5);
+        assertEquals(joinApplicationStatBo.getJoinDataSourceListBoList().size(), 5);
     }
 
     @Test
@@ -646,6 +1288,66 @@ public class JoinApplicationStatBoTest {
         joinTransactionBoList.add(joinTransactionBo5);
         joinAgentStatBo.setJoinTransactionBoList(joinTransactionBoList);
 
+        List<JoinActiveTraceBo> JoinActiveTraceBoList = new ArrayList<JoinActiveTraceBo>();
+        JoinActiveTraceBo joinActiveTraceBo1 = new JoinActiveTraceBo("agent1", 1, (short)2, 30, 15, "app_1_1", 40, "app_1_2", 1498462545000L);
+        JoinActiveTraceBo joinActiveTraceBo2 = new JoinActiveTraceBo("agent1", 1, (short)2, 30, 15, "app_1_1", 40, "app_1_2", 1498462550000L);
+        JoinActiveTraceBo joinActiveTraceBo3 = new JoinActiveTraceBo("agent1", 1, (short)2, 30, 15, "app_1_1", 40, "app_1_2", 1498462555000L);
+        JoinActiveTraceBo joinActiveTraceBo4 = new JoinActiveTraceBo("agent1", 1, (short)2, 30, 15, "app_1_1", 40, "app_1_2", 1498462560000L);
+        JoinActiveTraceBo joinActiveTraceBo5 = new JoinActiveTraceBo("agent1", 1, (short)2, 30, 15, "app_1_1", 40, "app_1_2", 1498462565000L);
+        JoinActiveTraceBoList.add(joinActiveTraceBo1);
+        JoinActiveTraceBoList.add(joinActiveTraceBo2);
+        JoinActiveTraceBoList.add(joinActiveTraceBo3);
+        JoinActiveTraceBoList.add(joinActiveTraceBo4);
+        JoinActiveTraceBoList.add(joinActiveTraceBo5);
+        joinAgentStatBo.setJoinActiveTraceBoList(JoinActiveTraceBoList);
+
+        List<JoinResponseTimeBo> joinResponseTimeBoList = new ArrayList<JoinResponseTimeBo>();
+        JoinResponseTimeBo joinResponseTimeBo1 = new JoinResponseTimeBo("agent1", 1498462545000L, 3000, 2, "app_1_1", 6000, "app_1_2");
+        JoinResponseTimeBo joinResponseTimeBo2 = new JoinResponseTimeBo("agent1", 1498462550000L, 4000, 200, "app_2_1", 9000, "app_2_2");
+        JoinResponseTimeBo joinResponseTimeBo3 = new JoinResponseTimeBo("agent1", 1498462555000L, 2000, 20, "app_3_1", 7000, "app_3_2");
+        JoinResponseTimeBo joinResponseTimeBo4 = new JoinResponseTimeBo("agent1", 1498462560000L, 5000, 20, "app_4_1", 8000, "app_4_2");
+        JoinResponseTimeBo joinResponseTimeBo5 = new JoinResponseTimeBo("agent1", 1498462565000L, 1000, 10, "app_5_1", 6600, "app_5_2");
+        joinResponseTimeBoList.add(joinResponseTimeBo1);
+        joinResponseTimeBoList.add(joinResponseTimeBo2);
+        joinResponseTimeBoList.add(joinResponseTimeBo3);
+        joinResponseTimeBoList.add(joinResponseTimeBo4);
+        joinResponseTimeBoList.add(joinResponseTimeBo5);
+        joinAgentStatBo.setJoinResponseTimeBoList(joinResponseTimeBoList);
+
+        final List<JoinDataSourceListBo> joinDataSourceListBoList = new ArrayList<JoinDataSourceListBo>();
+
+        List<JoinDataSourceBo> joinDataSourceBoList1 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList1.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 300, 250, "agent_id_1", 600, "agent_id_6"));
+        joinDataSourceBoList1.add(new JoinDataSourceBo((short)2000, "jdbc:mssql", 400, 350, "agent_id_1", 700, "agent_id_6"));
+        JoinDataSourceListBo joinDataSourceListBo1 = new JoinDataSourceListBo("agent1", joinDataSourceBoList1, 1498462545000L);
+
+        List<JoinDataSourceBo> joinDataSourceBoList2 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList2.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 200, 50, "agent_id_2", 700, "agent_id_7"));
+        joinDataSourceBoList2.add(new JoinDataSourceBo((short)2000, "jdbc:mssql", 300, 150, "agent_id_2", 800, "agent_id_7"));
+        JoinDataSourceListBo joinDataSourceListBo2 = new JoinDataSourceListBo("agent1", joinDataSourceBoList2, 1498462550000L);
+
+        List<JoinDataSourceBo> joinDataSourceBoList3 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList3.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 500, 150, "agent_id_3", 900, "agent_id_8"));
+        joinDataSourceBoList3.add(new JoinDataSourceBo((short)2000, "jdbc:mssql", 600, 250, "agent_id_3", 1000, "agent_id_8"));
+        JoinDataSourceListBo joinDataSourceListBo3 = new JoinDataSourceListBo("agent1", joinDataSourceBoList3, 1498462555000L);
+
+        List<JoinDataSourceBo> joinDataSourceBoList4 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList4.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 400, 550, "agent_id_4", 600, "agent_id_9"));
+        joinDataSourceBoList4.add(new JoinDataSourceBo((short)2000, "jdbc:mssql", 500, 650, "agent_id_4", 700, "agent_id_9"));
+        JoinDataSourceListBo joinDataSourceListBo4 = new JoinDataSourceListBo("agent1", joinDataSourceBoList4, 1498462560000L);
+
+        List<JoinDataSourceBo> joinDataSourceBoList5 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList5.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 100, 750, "agent_id_5", 800, "agent_id_10"));
+        joinDataSourceBoList5.add(new JoinDataSourceBo((short)2000, "jdbc:mssql", 200, 850, "agent_id_5", 900, "agent_id_10"));
+        JoinDataSourceListBo joinDataSourceListBo5 = new JoinDataSourceListBo("agent1", joinDataSourceBoList5, 1498462565000L);
+
+        joinDataSourceListBoList.add(joinDataSourceListBo1);
+        joinDataSourceListBoList.add(joinDataSourceListBo2);
+        joinDataSourceListBoList.add(joinDataSourceListBo3);
+        joinDataSourceListBoList.add(joinDataSourceListBo4);
+        joinDataSourceListBoList.add(joinDataSourceListBo5);
+        joinAgentStatBo.setJoinDataSourceListBoList(joinDataSourceListBoList);
+
         List<JoinApplicationStatBo> joinApplicationStatBoList = JoinApplicationStatBo.createJoinApplicationStatBo("test_app", joinAgentStatBo, 60000);
         assertEquals(joinApplicationStatBoList.size(), 2);
         for (JoinApplicationStatBo joinApplicationStatBo : joinApplicationStatBoList) {
@@ -654,10 +1356,16 @@ public class JoinApplicationStatBoTest {
                 assertEquals(joinApplicationStatBo.getJoinCpuLoadBoList().size(), 2);
                 assertEquals(joinApplicationStatBo.getJoinMemoryBoList().size(), 2);
                 assertEquals(joinApplicationStatBo.getJoinTransactionBoList().size(), 2);
+                assertEquals(joinApplicationStatBo.getJoinActiveTraceBoList().size(), 2);
+                assertEquals(joinApplicationStatBo.getJoinResponseTimeBoList().size(), 2);
+                assertEquals(joinApplicationStatBo.getJoinDataSourceListBoList().size(), 2);
             } else if (joinApplicationStatBo.getTimestamp() == 1498462500000L) {
                 assertEquals(joinApplicationStatBo.getJoinCpuLoadBoList().size(), 3);
                 assertEquals(joinApplicationStatBo.getJoinMemoryBoList().size(), 3);
                 assertEquals(joinApplicationStatBo.getJoinTransactionBoList().size(), 3);
+                assertEquals(joinApplicationStatBo.getJoinActiveTraceBoList().size(), 3);
+                assertEquals(joinApplicationStatBo.getJoinResponseTimeBoList().size(), 3);
+                assertEquals(joinApplicationStatBo.getJoinDataSourceListBoList().size(), 3);
             } else {
                 fail();
             }
@@ -708,6 +1416,66 @@ public class JoinApplicationStatBoTest {
         joinTransactionBoList.add(joinTransactionBo5);
         joinAgentStatBo.setJoinTransactionBoList(joinTransactionBoList);
 
+        List<JoinActiveTraceBo> JoinActiveTraceBoList = new ArrayList<JoinActiveTraceBo>();
+        JoinActiveTraceBo joinActiveTraceBo1 = new JoinActiveTraceBo("agent1", 1, (short)2, 30, 15, "app_1_1", 40, "app_1_2", 1498462545000L);
+        JoinActiveTraceBo joinActiveTraceBo2 = new JoinActiveTraceBo("agent1", 1, (short)2, 30, 15, "app_1_1", 40, "app_1_2", 1498462550000L);
+        JoinActiveTraceBo joinActiveTraceBo3 = new JoinActiveTraceBo("agent1", 1, (short)2, 30, 15, "app_1_1", 40, "app_1_2", 1498462555000L);
+        JoinActiveTraceBo joinActiveTraceBo4 = new JoinActiveTraceBo("agent1", 1, (short)2, 30, 15, "app_1_1", 40, "app_1_2", 1498462560000L);
+        JoinActiveTraceBo joinActiveTraceBo5 = new JoinActiveTraceBo("agent1", 1, (short)2, 30, 15, "app_1_1", 40, "app_1_2", 1498462565000L);
+        JoinActiveTraceBoList.add(joinActiveTraceBo1);
+        JoinActiveTraceBoList.add(joinActiveTraceBo2);
+        JoinActiveTraceBoList.add(joinActiveTraceBo3);
+        JoinActiveTraceBoList.add(joinActiveTraceBo4);
+        JoinActiveTraceBoList.add(joinActiveTraceBo5);
+        joinAgentStatBo.setJoinActiveTraceBoList(JoinActiveTraceBoList);
+
+        List<JoinResponseTimeBo> joinResponseTimeBoList = new ArrayList<JoinResponseTimeBo>();
+        JoinResponseTimeBo joinResponseTimeBo1 = new JoinResponseTimeBo("agent1", 1498462545000L, 3000, 2, "app_1_1", 6000, "app_1_2");
+        JoinResponseTimeBo joinResponseTimeBo2 = new JoinResponseTimeBo("agent1", 1498462550000L, 4000, 200, "app_2_1", 9000, "app_2_2");
+        JoinResponseTimeBo joinResponseTimeBo3 = new JoinResponseTimeBo("agent1", 1498462555000L, 2000, 20, "app_3_1", 7000, "app_3_2");
+        JoinResponseTimeBo joinResponseTimeBo4 = new JoinResponseTimeBo("agent1", 1498462560000L, 5000, 20, "app_4_1", 8000, "app_4_2");
+        JoinResponseTimeBo joinResponseTimeBo5 = new JoinResponseTimeBo("agent1", 1498462565000L, 1000, 10, "app_5_1", 6600, "app_5_2");
+        joinResponseTimeBoList.add(joinResponseTimeBo1);
+        joinResponseTimeBoList.add(joinResponseTimeBo2);
+        joinResponseTimeBoList.add(joinResponseTimeBo3);
+        joinResponseTimeBoList.add(joinResponseTimeBo4);
+        joinResponseTimeBoList.add(joinResponseTimeBo5);
+        joinAgentStatBo.setJoinResponseTimeBoList(joinResponseTimeBoList);
+
+        final List<JoinDataSourceListBo> joinDataSourceListBoList = new ArrayList<JoinDataSourceListBo>();
+
+        List<JoinDataSourceBo> joinDataSourceBoList1 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList1.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 300, 250, "agent_id_1", 600, "agent_id_6"));
+        joinDataSourceBoList1.add(new JoinDataSourceBo((short)2000, "jdbc:mssql", 400, 350, "agent_id_1", 700, "agent_id_6"));
+        JoinDataSourceListBo joinDataSourceListBo1 = new JoinDataSourceListBo("agent1", joinDataSourceBoList1, 1498462545000L);
+
+        List<JoinDataSourceBo> joinDataSourceBoList2 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList2.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 200, 50, "agent_id_2", 700, "agent_id_7"));
+        joinDataSourceBoList2.add(new JoinDataSourceBo((short)2000, "jdbc:mssql", 300, 150, "agent_id_2", 800, "agent_id_7"));
+        JoinDataSourceListBo joinDataSourceListBo2 = new JoinDataSourceListBo("agent1", joinDataSourceBoList2, 1498462550000L);
+
+        List<JoinDataSourceBo> joinDataSourceBoList3 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList3.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 500, 150, "agent_id_3", 900, "agent_id_8"));
+        joinDataSourceBoList3.add(new JoinDataSourceBo((short)2000, "jdbc:mssql", 600, 250, "agent_id_3", 1000, "agent_id_8"));
+        JoinDataSourceListBo joinDataSourceListBo3 = new JoinDataSourceListBo("agent1", joinDataSourceBoList3, 1498462555000L);
+
+        List<JoinDataSourceBo> joinDataSourceBoList4 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList4.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 400, 550, "agent_id_4", 600, "agent_id_9"));
+        joinDataSourceBoList4.add(new JoinDataSourceBo((short)2000, "jdbc:mssql", 500, 650, "agent_id_4", 700, "agent_id_9"));
+        JoinDataSourceListBo joinDataSourceListBo4 = new JoinDataSourceListBo("agent1", joinDataSourceBoList4, 1498462560000L);
+
+        List<JoinDataSourceBo> joinDataSourceBoList5 = new ArrayList<JoinDataSourceBo>();
+        joinDataSourceBoList5.add(new JoinDataSourceBo((short)1000, "jdbc:mysql", 100, 750, "agent_id_5", 800, "agent_id_10"));
+        joinDataSourceBoList5.add(new JoinDataSourceBo((short)2000, "jdbc:mssql", 200, 850, "agent_id_5", 900, "agent_id_10"));
+        JoinDataSourceListBo joinDataSourceListBo5 = new JoinDataSourceListBo("agent1", joinDataSourceBoList5, 1498462565000L);
+
+        joinDataSourceListBoList.add(joinDataSourceListBo1);
+        joinDataSourceListBoList.add(joinDataSourceListBo2);
+        joinDataSourceListBoList.add(joinDataSourceListBo3);
+        joinDataSourceListBoList.add(joinDataSourceListBo4);
+        joinDataSourceListBoList.add(joinDataSourceListBo5);
+        joinAgentStatBo.setJoinDataSourceListBoList(joinDataSourceListBoList);
+
         List<JoinApplicationStatBo> joinApplicationStatBoList = JoinApplicationStatBo.createJoinApplicationStatBo("test_app", joinAgentStatBo, 10000);
         assertEquals(joinApplicationStatBoList.size(), 3);
         for (JoinApplicationStatBo joinApplicationStatBo : joinApplicationStatBoList) {
@@ -716,14 +1484,23 @@ public class JoinApplicationStatBoTest {
                 assertEquals(joinApplicationStatBo.getJoinCpuLoadBoList().size(), 2);
                 assertEquals(joinApplicationStatBo.getJoinMemoryBoList().size(), 2);
                 assertEquals(joinApplicationStatBo.getJoinTransactionBoList().size(), 2);
+                assertEquals(joinApplicationStatBo.getJoinActiveTraceBoList().size(), 2);
+                assertEquals(joinApplicationStatBo.getJoinResponseTimeBoList().size(), 2);
+                assertEquals(joinApplicationStatBo.getJoinDataSourceListBoList().size(), 2);
             } else if (joinApplicationStatBo.getTimestamp() == 1498462540000L) {
                 assertEquals(joinApplicationStatBo.getJoinCpuLoadBoList().size(), 1);
                 assertEquals(joinApplicationStatBo.getJoinMemoryBoList().size(), 1);
                 assertEquals(joinApplicationStatBo.getJoinTransactionBoList().size(), 1);
+                assertEquals(joinApplicationStatBo.getJoinActiveTraceBoList().size(), 1);
+                assertEquals(joinApplicationStatBo.getJoinResponseTimeBoList().size(), 1);
+                assertEquals(joinApplicationStatBo.getJoinDataSourceListBoList().size(), 1);
             } else if (joinApplicationStatBo.getTimestamp() == 1498462550000L) {
                 assertEquals(joinApplicationStatBo.getJoinCpuLoadBoList().size(), 2);
                 assertEquals(joinApplicationStatBo.getJoinMemoryBoList().size(), 2);
                 assertEquals(joinApplicationStatBo.getJoinTransactionBoList().size(), 2);
+                assertEquals(joinApplicationStatBo.getJoinActiveTraceBoList().size(), 2);
+                assertEquals(joinApplicationStatBo.getJoinResponseTimeBoList().size(), 2);
+                assertEquals(joinApplicationStatBo.getJoinDataSourceListBoList().size(), 2);
             } else {
                 fail();
             }

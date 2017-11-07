@@ -20,7 +20,9 @@
 			cfg.ID +=  CommonUtilService.getRandomNum();
 			AnalyticsService.send(AnalyticsService.CONST.INSPECTOR_PAGE);
 
+			UrlVoService.initUrlVo( "inspector", $routeParams );
 			$scope.$on( "up.changed.application", function ( event, invokerId, newAppName ) {
+				$scope.selectedAgent = false;
 				UrlVoService.setApplication( newAppName );
 				UrlVoService.setAgentId( "" );
 				$timeout(function() {
@@ -88,8 +90,6 @@
 	            }
 	            return url;
 	        };
-
-			$scope.$broadcast("down.initialize", cfg.ID );
 	    }
 	]);
 })();

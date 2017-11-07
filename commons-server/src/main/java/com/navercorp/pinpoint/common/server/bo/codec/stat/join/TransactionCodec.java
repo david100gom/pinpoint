@@ -83,23 +83,23 @@ public class TransactionCodec implements ApplicationStatCodec {
         encodeDataPoints(valueBuffer, collectIntervalAnalyzerBuilder.build(), totalCountAnalyzerBuilder.build(), minTotalCountAnalyzerBuilder.build(), minTotalCountAgentIdAnalyzerBuilder.build(), maxTotalCountAnalyzerBuilder.build(), maxTotalCountAgentIdAnalyzerBuilder.build());
     }
 
-    private void encodeDataPoints(Buffer valueBuffer, StrategyAnalyzer<Long> collectIntervalAnalyzerBuilder, StrategyAnalyzer<Long> totalCountAnalyzerBuilder, StrategyAnalyzer<Long> minTotalCountAnalyzerBuilder, StrategyAnalyzer<String> minTotalCountAgentIdAnalyzerBuilder, StrategyAnalyzer<Long> maxTotalCountAnalyzerBuilder, StrategyAnalyzer<String> maxTotalCountAgentIdAnalyzerBuilder) {
+    private void encodeDataPoints(Buffer valueBuffer, StrategyAnalyzer<Long> collectIntervalAnalyzer, StrategyAnalyzer<Long> totalCountAnalyzer, StrategyAnalyzer<Long> minTotalCountAnalyzer, StrategyAnalyzer<String> minTotalCountAgentIdAnalyzer, StrategyAnalyzer<Long> maxTotalCountAnalyzer, StrategyAnalyzer<String> maxTotalCountAgentIdAnalyzer) {
         AgentStatHeaderEncoder headerEncoder = new BitCountingHeaderEncoder();
-        headerEncoder.addCode(collectIntervalAnalyzerBuilder.getBestStrategy().getCode());
-        headerEncoder.addCode(totalCountAnalyzerBuilder.getBestStrategy().getCode());
-        headerEncoder.addCode(minTotalCountAnalyzerBuilder.getBestStrategy().getCode());
-        headerEncoder.addCode(minTotalCountAgentIdAnalyzerBuilder.getBestStrategy().getCode());
-        headerEncoder.addCode(maxTotalCountAnalyzerBuilder.getBestStrategy().getCode());
-        headerEncoder.addCode(maxTotalCountAgentIdAnalyzerBuilder.getBestStrategy().getCode());
+        headerEncoder.addCode(collectIntervalAnalyzer.getBestStrategy().getCode());
+        headerEncoder.addCode(totalCountAnalyzer.getBestStrategy().getCode());
+        headerEncoder.addCode(minTotalCountAnalyzer.getBestStrategy().getCode());
+        headerEncoder.addCode(minTotalCountAgentIdAnalyzer.getBestStrategy().getCode());
+        headerEncoder.addCode(maxTotalCountAnalyzer.getBestStrategy().getCode());
+        headerEncoder.addCode(maxTotalCountAgentIdAnalyzer.getBestStrategy().getCode());
         final byte[] header = headerEncoder.getHeader();
         valueBuffer.putPrefixedBytes(header);
 
-        this.codec.encodeValues(valueBuffer, collectIntervalAnalyzerBuilder.getBestStrategy(), collectIntervalAnalyzerBuilder.getValues());
-        this.codec.encodeValues(valueBuffer, totalCountAnalyzerBuilder.getBestStrategy(), totalCountAnalyzerBuilder.getValues());
-        this.codec.encodeValues(valueBuffer, minTotalCountAnalyzerBuilder.getBestStrategy(), minTotalCountAnalyzerBuilder.getValues());
-        this.codec.encodeValues(valueBuffer, minTotalCountAgentIdAnalyzerBuilder.getBestStrategy(), minTotalCountAgentIdAnalyzerBuilder.getValues());
-        this.codec.encodeValues(valueBuffer, maxTotalCountAnalyzerBuilder.getBestStrategy(), maxTotalCountAnalyzerBuilder.getValues());
-        this.codec.encodeValues(valueBuffer, maxTotalCountAgentIdAnalyzerBuilder.getBestStrategy(), maxTotalCountAgentIdAnalyzerBuilder.getValues());
+        this.codec.encodeValues(valueBuffer, collectIntervalAnalyzer.getBestStrategy(), collectIntervalAnalyzer.getValues());
+        this.codec.encodeValues(valueBuffer, totalCountAnalyzer.getBestStrategy(), totalCountAnalyzer.getValues());
+        this.codec.encodeValues(valueBuffer, minTotalCountAnalyzer.getBestStrategy(), minTotalCountAnalyzer.getValues());
+        this.codec.encodeValues(valueBuffer, minTotalCountAgentIdAnalyzer.getBestStrategy(), minTotalCountAgentIdAnalyzer.getValues());
+        this.codec.encodeValues(valueBuffer, maxTotalCountAnalyzer.getBestStrategy(), maxTotalCountAnalyzer.getValues());
+        this.codec.encodeValues(valueBuffer, maxTotalCountAgentIdAnalyzer.getBestStrategy(), maxTotalCountAgentIdAnalyzer.getValues());
     }
 
 
@@ -131,7 +131,7 @@ public class TransactionCodec implements ApplicationStatCodec {
         List<String> maxTotalCountAgentIdList = this.codec.decodeValues(valueBuffer, maxTotalCountAgentIdEncodingStrategy, numValues);
 
         List<JoinStatBo> joinTransactionBoList = new ArrayList<JoinStatBo>();
-        for (int i = 0 ; i < numValues ; ++i) {
+        for (int i = 0 ; i < numValues ; i++) {
             JoinTransactionBo joinTransactionBo = new JoinTransactionBo();
             joinTransactionBo.setId(id);
             joinTransactionBo.setTimestamp(timestampList.get(i));

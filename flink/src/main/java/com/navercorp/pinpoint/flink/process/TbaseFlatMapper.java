@@ -16,40 +16,49 @@
 package com.navercorp.pinpoint.flink.process;
 
 import com.navercorp.pinpoint.common.server.bo.stat.join.*;
+import com.navercorp.pinpoint.flink.Bootstrap;
 import com.navercorp.pinpoint.flink.function.ApplicationStatBoWindow;
 import com.navercorp.pinpoint.flink.mapper.thrift.stat.JoinAgentStatBoMapper;
 import com.navercorp.pinpoint.thrift.dto.flink.TFAgentStatBatch;
-import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.api.java.tuple.Tuple3;
 
-import org.apache.flink.util.CollectionUtil;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Collector;
 import org.apache.thrift.TBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author minwoo.jung
  */
-public class TbaseFlatMapper implements FlatMapFunction<TBase, Tuple3<String, JoinStatBo, Long>> {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private static JoinAgentStatBoMapper joinAgentStatBoMapper = new JoinAgentStatBoMapper();
-    private static ApplicationCache applicationCache;
+public class TbaseFlatMapper extends RichFlatMapFunction<TBase, Tuple3<String, JoinStatBo, Long>> {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    private transient JoinAgentStatBoMapper joinAgentStatBoMapper;
+    private transient ApplicationCache applicationCache;
 
-    public void setApplicationCache(ApplicationCache applicationCache) {
-        TbaseFlatMapper.applicationCache = applicationCache;
+    public TbaseFlatMapper() {
+    }
+
+    public TbaseFlatMapper(JoinAgentStatBoMapper joinAgentStatBoMapper, ApplicationCache applicationCache) {
+        this.joinAgentStatBoMapper = joinAgentStatBoMapper;
+        this.applicationCache = applicationCache;
+    }
+
+    public void open(Configuration parameters) throws Exception {
+        this.joinAgentStatBoMapper = new JoinAgentStatBoMapper();
+        applicationCache = Bootstrap.getInstance().getApplicationCache();
     }
 
     @Override
     public void flatMap(TBase tBase, Collector<Tuple3<String, JoinStatBo, Long>> out) throws Exception {
         if (tBase instanceof TFAgentStatBatch) {
-            logger.info("raw data : {}" + tBase);
+            if (logger.isDebugEnabled()) {
+                logger.debug("raw data : {}", tBase);
+            }
             final TFAgentStatBatch tFAgentStatBatch = (TFAgentStatBatch) tBase;
             final JoinAgentStatBo joinAgentStatBo;
             try {
@@ -68,7 +77,7 @@ public class TbaseFlatMapper implements FlatMapFunction<TBase, Tuple3<String, Jo
             final ApplicationCache.ApplicationKey applicationKey = new ApplicationCache.ApplicationKey(joinAgentStatBo.getId(), joinAgentStatBo.getAgentStartTimestamp());
             final String applicationId = applicationCache.findApplicationId(applicationKey);
 
-            if (applicationId.equals(ApplicationCache.NOT_FOOUND_APP_ID)) {
+            if (applicationId.equals(ApplicationCache.NOT_FOUND_APP_ID)) {
                 logger.warn("can't found application id");
                 return;
             }
