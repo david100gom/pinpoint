@@ -19,28 +19,31 @@ package com.navercorp.pinpoint.web.vo.stat;
 import com.navercorp.pinpoint.web.vo.chart.Point;
 import com.navercorp.pinpoint.web.vo.stat.chart.agent.AgentStatPoint;
 
+import java.util.Objects;
+
 /**
  * @author Taejin Koo
  */
 public class SampledDeadlock implements SampledAgentStatDataPoint {
 
     public static final int UNCOLLECTED_COUNT = -1;
-    public static final Point.UncollectedPointCreator<AgentStatPoint<Integer>> UNCOLLECTED_POINT_CREATER = new Point.UncollectedPointCreator<AgentStatPoint<Integer>>() {
+    public static final Point.UncollectedPointCreator<AgentStatPoint<Integer>> UNCOLLECTED_POINT_CREATOR = new Point.UncollectedPointCreator<AgentStatPoint<Integer>>() {
         @Override
         public AgentStatPoint<Integer> createUnCollectedPoint(long xVal) {
             return new AgentStatPoint<>(xVal, UNCOLLECTED_COUNT);
         }
     };
 
-    private AgentStatPoint<Integer> deadlockedThreadCount;
+    private final AgentStatPoint<Integer> deadlockedThreadCount;
+
+    public SampledDeadlock(AgentStatPoint<Integer> deadlockedThreadCount) {
+        this.deadlockedThreadCount = Objects.requireNonNull(deadlockedThreadCount, "deadlockedThreadCount must not be null");
+    }
 
     public AgentStatPoint<Integer> getDeadlockedThreadCount() {
         return deadlockedThreadCount;
     }
 
-    public void setDeadlockedThreadCount(AgentStatPoint<Integer> deadlockedThreadCount) {
-        this.deadlockedThreadCount = deadlockedThreadCount;
-    }
 
     @Override
     public boolean equals(Object o) {

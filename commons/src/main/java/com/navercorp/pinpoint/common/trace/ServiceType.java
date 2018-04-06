@@ -52,9 +52,17 @@ import static com.navercorp.pinpoint.common.trace.ServiceTypeProperty.*;
  * <tr><td>1051</td><td>VERTX_INTERNAL</td></tr>
  * <tr><td>1052</td><td>VERTX_HTTP_SERVER</td></tr>
  * <tr><td>1053</td><td>VERTX_HTTP_SERVER_INTERNAL</td></tr>
+ * <tr><td>1060</td><td>WEBSPHERE</td></tr>
+ * <tr><td>1061</td><td>WEBSPHERE_METHOD</td></tr>
+ * <tr><td>1070</td><td>WEBLOGIC</td></tr>
+ * <tr><td>1071</td><td>WEBLOGIC_METHOD</td></tr>
  * <tr><td>1100</td><td>THRIFT_SERVER</td></tr>
  * <tr><td>1101</td><td>THRIFT_SERVER_INTERNAL</td></tr>
  * <tr><td>1110</td><td>DUBBO_PROVIDER</td></tr>
+ *
+ * <tr><td>1500</td><td>PHP</td></tr>
+ * <tr><td>1501</td><td>PHP_METHOD</td></tr>
+ *
  * </table>
  * 
  * <h3>Server Sandbox (1900 ~ 1999)</h3>
@@ -112,7 +120,7 @@ import static com.navercorp.pinpoint.common.trace.ServiceTypeProperty.*;
  *
  * <h3>Library Sandbox (7500 ~ 7999)</h3>
  *
- * <h3>Cache Library (8000 ~ 8899) Fast Histogram</h3>
+ * <h3>Cache & File Library (8000 ~ 8899) Fast Histogram</h3>
  * <table>
  * <tr><td>8050</td><td>MEMCACHED</td></tr>
  * <tr><td>8051</td><td>MEMCACHED_FUTURE_GET</td></tr>
@@ -123,6 +131,8 @@ import static com.navercorp.pinpoint.common.trace.ServiceTypeProperty.*;
  * <tr><td>8200</td><td>REDIS</td></tr>
  * <tr><td>8250</td><td><i>RESERVED</i></td></tr>
  * <tr><td>8251</td><td><i>RESERVED</i></td></tr>
+ * <tr><td>8260</td><td><i>RESERVED</i></td></tr>
+ * <tr><td>8300</td><td>RABBITMQ</td></tr>
  * <tr><td>8310</td><td><i>ACTIVEMQ_CLIENT</i></td></tr>
  * <tr><td>8311</td><td><i>ACTIVEMQ_CLIENT_INTERNAL</i></td></tr>
  * </table>
@@ -228,7 +238,13 @@ public interface ServiceType {
     ServiceType STAND_ALONE = of(1000, "STAND_ALONE", RECORD_STATISTICS);
     ServiceType TEST_STAND_ALONE = of(1005, "TEST_STAND_ALONE", RECORD_STATISTICS);
     ServiceType UNAUTHORIZED = of(1007, "UNAUTHORIZED", RECORD_STATISTICS);
-    
+
+    // Added for php agent.
+    @Deprecated
+    ServiceType PHP = ServiceTypeFactory.of(1500, "PHP", RECORD_STATISTICS);
+    // Added for php agent.
+    @Deprecated
+    ServiceType PHP_METHOD = ServiceTypeFactory.of(1501, "PHP_METHOD");
 
 
     /**

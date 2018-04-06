@@ -19,54 +19,36 @@ package com.navercorp.pinpoint.web.vo.stat;
 import com.navercorp.pinpoint.web.vo.chart.Point;
 import com.navercorp.pinpoint.web.vo.stat.chart.agent.AgentStatPoint;
 
+import java.util.Objects;
+
 /**
  * @author HyunGil Jeong
  */
 public class SampledCpuLoad implements SampledAgentStatDataPoint {
 
     public static final Double UNCOLLECTED_PERCENTAGE = -1D;
-    public static final Point.UncollectedPointCreator<AgentStatPoint<Double>> UNCOLLECTED_POINT_CREATER = new Point.UncollectedPointCreator<AgentStatPoint<Double>>() {
+    public static final Point.UncollectedPointCreator<AgentStatPoint<Double>> UNCOLLECTED_POINT_CREATOR = new Point.UncollectedPointCreator<AgentStatPoint<Double>>() {
         @Override
         public AgentStatPoint<Double> createUnCollectedPoint(long xVal) {
             return new AgentStatPoint<>(xVal, UNCOLLECTED_PERCENTAGE);
         }
     };
 
-    private AgentStatPoint<Double> jvmCpuLoad;
-    private AgentStatPoint<Double> systemCpuLoad;
+    private final AgentStatPoint<Double> jvmCpuLoad;
+    private final AgentStatPoint<Double> systemCpuLoad;
+
+    public SampledCpuLoad(AgentStatPoint<Double> jvmCpuLoad, AgentStatPoint<Double> systemCpuLoad) {
+        this.jvmCpuLoad = Objects.requireNonNull(jvmCpuLoad, "jvmCpuLoad must not be null");
+        this.systemCpuLoad = Objects.requireNonNull(systemCpuLoad, "systemCpuLoad must not be null");
+    }
 
     public AgentStatPoint<Double> getJvmCpuLoad() {
         return jvmCpuLoad;
     }
 
-    public void setJvmCpuLoad(AgentStatPoint<Double> jvmCpuLoad) {
-        this.jvmCpuLoad = jvmCpuLoad;
-    }
 
     public AgentStatPoint<Double> getSystemCpuLoad() {
         return systemCpuLoad;
-    }
-
-    public void setSystemCpuLoad(AgentStatPoint<Double> systemCpuLoad) {
-        this.systemCpuLoad = systemCpuLoad;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        SampledCpuLoad that = (SampledCpuLoad) o;
-
-        if (jvmCpuLoad != null ? !jvmCpuLoad.equals(that.jvmCpuLoad) : that.jvmCpuLoad != null) return false;
-        return systemCpuLoad != null ? systemCpuLoad.equals(that.systemCpuLoad) : that.systemCpuLoad == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = jvmCpuLoad != null ? jvmCpuLoad.hashCode() : 0;
-        result = 31 * result + (systemCpuLoad != null ? systemCpuLoad.hashCode() : 0);
-        return result;
     }
 
     @Override

@@ -22,8 +22,7 @@
 					forceMax: true,
 					defaultMax: 100
 				};
-
-				if ( jvmCpuLen.length === 0 && systemCpuLen.length === 0 ) {
+				if ( jvmCpuLen === 0 && systemCpuLen === 0 ) {
 					refinedChartData.empty = true;
 				}
 				for (var i = 0; i < xLen; ++i) {
@@ -31,10 +30,10 @@
 						time: moment(aX[i]).format( cfg.dateFormat )
 					};
 					if ( jvmCpuLen > i ) {
-						thisData["jvmCpuLoad"] = pointsJvmCpuLoad[i][1].toFixed(2);
+						thisData["jvmCpuLoad"] = pointsJvmCpuLoad[i][1] === -1 ? null : pointsJvmCpuLoad[i][1].toFixed(2);
 					}
 					if ( systemCpuLen > i ) {
-						thisData["systemCpuLoad"] = pointsSystemCpuLoad[i][1].toFixed(2);
+						thisData["systemCpuLoad"] = pointsSystemCpuLoad[i][1] === -1 ? null : pointsSystemCpuLoad[i][1].toFixed(2);
 					}
 					refinedChartData.data.push(thisData);
 				}
@@ -56,7 +55,13 @@
 						"position": "top",
 						"valueWidth": 70,
 						"markerSize": 10,
-						"valueAlign": "left"
+						"valueAlign": "left",
+						"valueFunction": function(graphDataItem, valueText) {
+							if ( parseInt( valueText ) === -1 ) {
+								return "";
+							}
+							return valueText;
+						}
 					},
 					"usePrefixes": true,
 					"dataProvider": oChartData.data,
@@ -96,15 +101,6 @@
 							"valueField": "systemCpuLoad",
 							"fillAlphas": 0.4,
 							"connect": false
-						},
-						{
-							"valueAxis": "v1",
-							"showBalloon": false,
-							"lineColor": "#FF6600",
-							"title": "Max",
-							"valueField": "maxCpuLoad",
-							"fillAlphas": 0,
-							"visibleInLegend": false
 						}
 					],
 					"categoryField": "time",

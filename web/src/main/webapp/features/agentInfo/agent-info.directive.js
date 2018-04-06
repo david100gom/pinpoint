@@ -3,8 +3,8 @@
 		ID: "AGENT_INFO_DRTV_"
 	});
 
-	pinpointApp.directive( "agentInfoDirective", [ "agentInfoDirectiveConfig", "$sce", "$timeout", "SystemConfigurationService", "CommonUtilService", "UrlVoService", "AlertsService", "ProgressBarService", "AgentDaoService", "ResponseTimeChartDaoService", "ActiveThreadChartDaoService", "TPSChartDaoService", "CPULoadChartDaoService", "MemoryChartDaoService", "AgentAjaxService", "TooltipService", "AnalyticsService", "helpContentService",
-		function ( cfg, $sce, $timeout, SystemConfigService, CommonUtilService, UrlVoService, AlertsService, ProgressBarService, AgentDaoService, ResponseTimeChartDaoService, ActiveThreadChartDaoService, TPSChartDaoService, CPULoadChartDaoService, MemoryChartDaoService, AgentAjaxService, TooltipService, AnalyticsService, helpContentService ) {
+	pinpointApp.directive( "agentInfoDirective", [ "agentInfoDirectiveConfig", "$sce", "$timeout", "CommonUtilService", "UrlVoService", "AlertsService", "ProgressBarService", "AgentDaoService", "ResponseTimeChartDaoService", "ActiveThreadChartDaoService", "TPSChartDaoService", "CPULoadChartDaoService", "MemoryChartDaoService", "OpenFileDescriptorDaoService", "AgentAjaxService", "TooltipService", "AnalyticsService", "helpContentService",
+		function ( cfg, $sce, $timeout, CommonUtilService, UrlVoService, AlertsService, ProgressBarService, AgentDaoService, ResponseTimeChartDaoService, ActiveThreadChartDaoService, TPSChartDaoService, CPULoadChartDaoService, MemoryChartDaoService, OpenFileDescriptorDaoService, AgentAjaxService, TooltipService, AnalyticsService, helpContentService ) {
 			return {
 				restrict: 'EA',
 				replace: true,
@@ -12,7 +12,6 @@
 				link: function postLink(scope, element, attrs) {
 					cfg.ID += CommonUtilService.getRandomNum();
 					scope.agent = {};
-					scope.hasAgentData = false;
 					scope.showEventInfo = false;
 					scope.showDetail = false;
 					scope.selectTime = -1;
@@ -28,30 +27,28 @@
 							timeSlider.resetTimeSeriesAndSelectionZone( aSelectionFromTo, aFromTo ? aFromTo : calcuSliderTimeSeries( aSelectionFromTo ), selectedTime );
 							getTimelineList( scope.agent.agentId, aFromTo || calcuSliderTimeSeries( aSelectionFromTo ) );
 						} else {
-							$timeout(function() {
-								timeSlider = new TimeSlider("timeSlider-for-agent-info", {
-									"width": $("#timeSlider-for-agent-info").get(0).getBoundingClientRect().width,
-									"height": 90,
-									"handleSrc": "images/handle.png",
-									"timeSeries": aFromTo ? aFromTo : calcuSliderTimeSeries(aSelectionFromTo),
-									"handleTimeSeries": aSelectionFromTo,
-									"selectTime": aSelectionFromTo[1],
-									"timelineData": {}
-								}).addEvent("clickEvent", function (aEvent) {// [x, y, obj]
-									loadEventInfo(aEvent[2]);
-								}).addEvent("selectTime", function (time) {
-									scope.selectTime = time;
-									loadAgentInfo(time);
-									initTime(time);
-									sendUpTimeSliderTimeInfo(timeSlider.getSliderTimeSeries(), timeSlider.getSelectionTimeSeries(), time);
-								}).addEvent("changeSelectionZone", function (aTime) {
-									loadChartData(scope.agent.agentId, aTime, getPeriod(aTime[0], aTime[1]), function () {
-									});
-									sendUpTimeSliderTimeInfo(timeSlider.getSliderTimeSeries(), aTime, timeSlider.getSelectTime());
-								}).addEvent("changeSliderTimeSeries", function (aEvents) {
+							timeSlider = new TimeSlider("timeSlider-for-agent-info", {
+								"width": $("#timeSlider-for-agent-info").get(0).getBoundingClientRect().width,
+								"height": 90,
+								"handleSrc": "images/handle.png",
+								"timeSeries": aFromTo ? aFromTo : calcuSliderTimeSeries(aSelectionFromTo),
+								"handleTimeSeries": aSelectionFromTo,
+								"selectTime": aSelectionFromTo[1],
+								"timelineData": {}
+							}).addEvent("clickEvent", function (aEvent) {// [x, y, obj]
+								loadEventInfo(aEvent[2]);
+							}).addEvent("selectTime", function (time) {
+								scope.selectTime = time;
+								loadAgentInfo(time);
+								initTime(time);
+								sendUpTimeSliderTimeInfo(timeSlider.getSliderTimeSeries(), timeSlider.getSelectionTimeSeries(), time);
+							}).addEvent("changeSelectionZone", function (aTime) {
+								loadChartData(scope.agent.agentId, aTime, getPeriod(aTime[0], aTime[1]), function () {
 								});
-								getTimelineList( scope.agent.agentId, aFromTo || calcuSliderTimeSeries( aSelectionFromTo ) );
+								sendUpTimeSliderTimeInfo(timeSlider.getSliderTimeSeries(), aTime, timeSlider.getSelectTime());
+							}).addEvent("changeSliderTimeSeries", function (aEvents) {
 							});
+							getTimelineList( scope.agent.agentId, aFromTo || calcuSliderTimeSeries( aSelectionFromTo ) );
 						}
 					}
 					function sendUpTimeSliderTimeInfo( sliderTimeSeries, sliderSelectionTimeSeries, sliderSelectedTime ) {
@@ -90,6 +87,9 @@
 						AgentAjaxService.getDataSourceChartData( oParam, function (result) {
 							dataSourceChartData = result;
 							showDataSourceChart();
+						});
+						AgentAjaxService.getOpenFileDescriptorChartData( oParam, function (result) {
+							showOpenFileDescriptorChart(result);
 						});
 					}
 					function loadAgentInfo( time ) {
@@ -134,7 +134,7 @@
 					}
 					function initTooltip() {
 						if ( bInitTooltip === false ) {
-							["heap", "permGen", "cpuUsage", "tps", "activeThread", "responseTime", "dataSource"].forEach(function(value) {
+							["heap", "permGen", "cpuUsage", "tps", "activeThread", "responseTime", "dataSource", "openFileDescriptor"].forEach(function(value) {
 								TooltipService.init( value );
 							});
 							bInitTooltip = true;
@@ -219,6 +219,16 @@
 							"270px"
 						);
 					}
+					function showOpenFileDescriptorChart( chartData ) {
+						var refinedChartData = OpenFileDescriptorDaoService.parseData( chartData );
+						scope.$broadcast(
+							"agentInspectorChartDirective.initAndRenderWithData.agent-open-file-descriptor",
+							refinedChartData,
+							OpenFileDescriptorDaoService.getChartOptions( refinedChartData ),
+							"100%",
+							"270px"
+						);
+					}
 					var dataSourceChartData = [];
 					var dataSourceIdPrefix = "source_";
 					scope.dataSourceChartKeys = [];
@@ -298,6 +308,9 @@
 								timeSlider.addData(result);
 							}
 						});
+					}
+					function removePopover() {
+						$("._wrongApp").popover("destroy");
 					}
 					scope.toggleSourceSelectLayer = function() {
 						element.find("#data-source-chart .type-select-layer").toggle();
@@ -381,9 +394,9 @@
 						}
 					};
 					scope.$on( "down.changed.agent", function ( event, invokerId, agent, bInvokedByTop, sliderTimeSeriesOption ) {
+						removePopover();
 						if( cfg.ID === invokerId ) return;
 						if ( CommonUtilService.isEmpty( agent.agentId ) ) {
-							scope.hasAgentData = false;
 							return;
 						}
 						// init data-source data
@@ -394,7 +407,6 @@
 						element.find(".type-select-layer").hide();
 						element.find(".ds-detail").hide();
 						scope.showEventInfo = false;
-						scope.hasAgentData = true;
 						scope.agent = agent;
 						scope.chartGroup = null;
 						scope.currentServiceInfo = initServiceInfo(agent);
@@ -432,6 +444,11 @@
 						// getTimelineList( scope.agent.agentId, aFromTo || calcuSliderTimeSeries( aSelectionFromTo ) );
 					}
 					scope.$on("agentInspectorChartDirective.cursorChanged", function (e, sourceTarget, event) {
+						if ( typeof event.index === "undefined" ) {
+							timeSlider.hideFocus();
+						} else {
+							timeSlider.showFocus( moment(event.target.chart.dataProvider[event.index].time).valueOf() );
+						}
 						scope.$broadcast( "agentInspectorChartDirective.showCursorAt", sourceTarget, event.index );
 						scope.$broadcast( "dsChartDirective.showCursorAt.agent-data-source", event.index);
 					});

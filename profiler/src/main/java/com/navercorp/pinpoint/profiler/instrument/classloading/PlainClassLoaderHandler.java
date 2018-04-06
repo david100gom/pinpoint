@@ -108,12 +108,7 @@ public class PlainClassLoaderHandler implements ClassInjector {
             if (!isPluginPackage(name)) {
                 return targetClassLoader.getResourceAsStream(classPath);
             }
-            final int fileExtensionPosition = name.lastIndexOf(".class");
-            if (fileExtensionPosition != -1) {
-                name = name.substring(0, fileExtensionPosition);
-            }
-
-            final InputStream inputStream = getInputStream(targetClassLoader, name);
+            final InputStream inputStream = getInputStream(targetClassLoader, classPath);
             if (inputStream == null) {
                 if (logger.isInfoEnabled()) {
                     logger.info("can not find resource : {} {} ", classPath, pluginConfig.getPluginJarURLExternalForm());
@@ -134,7 +129,7 @@ public class PlainClassLoaderHandler implements ClassInjector {
 
 
 
-    private Class<?> injectClass0(ClassLoader classLoader, String className) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    private Class<?> injectClass0(ClassLoader classLoader, String className) throws IllegalArgumentException {
         if (isDebug) {
             logger.debug("Inject class className:{} cl:{}", className, classLoader);
         }
@@ -152,7 +147,7 @@ public class PlainClassLoaderHandler implements ClassInjector {
 
     }
 
-    private InputStream getInputStream(ClassLoader classLoader, String classPath) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    private InputStream getInputStream(ClassLoader classLoader, String classPath) throws IllegalArgumentException {
         if (isDebug) {
             logger.debug("Get input stream className:{} cl:{}", classPath, classLoader);
 

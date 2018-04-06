@@ -70,7 +70,13 @@
 						"position": "top",
 						"valueWidth": 70,
 						"markerSize": 10,
-						"valueAlign": "left"
+						"valueAlign": "left",
+						"valueFunction": function(graphDataItem, valueText) {
+							if ( parseInt( valueText ) === -1 ) {
+								return "";
+							}
+							return valueText;
+						}
 					},
 					"usePrefixes": true,
 					"dataProvider": oChartData.data,
@@ -147,7 +153,7 @@
 				};
 			};
 			function getFloatValue( val ) {
-				return angular.isNumber( val ) ? val.toFixed(2) : 0.00;
+				return angular.isNumber( val ) ? ( val === -1 ? null : val.toFixed(2) ) : 0.00;
 			}
 		}
 	]);

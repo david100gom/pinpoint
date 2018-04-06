@@ -16,6 +16,7 @@
 
 package com.navercorp.pinpoint.web.vo.stat.chart.agent;
 
+import com.google.common.collect.ImmutableMap;
 import com.navercorp.pinpoint.web.util.TimeWindow;
 import com.navercorp.pinpoint.web.vo.chart.Chart;
 import com.navercorp.pinpoint.web.vo.chart.Point;
@@ -24,8 +25,6 @@ import com.navercorp.pinpoint.web.vo.stat.SampledResponseTime;
 import com.navercorp.pinpoint.web.vo.stat.chart.StatChart;
 import com.navercorp.pinpoint.web.vo.stat.chart.StatChartGroup;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -52,18 +51,24 @@ public class ResponseTimeChart implements StatChart {
         private final Map<ChartType, Chart<? extends Point>> responseTimeCharts;
 
         public enum ResponseTimeChartType implements AgentChartType {
-            AVG
+            AVG,
+            MAX
         }
 
         public ResponseTimeChartGroup(TimeWindow timeWindow, List<SampledResponseTime> sampledResponseTimes) {
             this.timeWindow = timeWindow;
-            this.responseTimeCharts = new HashMap<>();
-            List<AgentStatPoint<Long>> avg = new ArrayList<>(sampledResponseTimes.size());
-            for (SampledResponseTime sampledResponseTime : sampledResponseTimes) {
-                avg.add(sampledResponseTime.getAvg());
-            }
-            TimeSeriesChartBuilder<AgentStatPoint<Long>> chartBuilder = new TimeSeriesChartBuilder<>(this.timeWindow, SampledResponseTime.UNCOLLECTED_POINT_CREATER);
-            responseTimeCharts.put(ResponseTimeChartType.AVG, chartBuilder.build(avg));
+            this.responseTimeCharts = newChart(sampledResponseTimes);
+        }
+
+        private Map<ChartType, Chart<? extends Point>> newChart(List<SampledResponseTime> sampledResponseTimes) {
+            TimeSeriesChartBuilder<AgentStatPoint<Long>> chartBuilder = new TimeSeriesChartBuilder<>(this.timeWindow, SampledResponseTime.UNCOLLECTED_POINT_CREATOR);
+            Chart<AgentStatPoint<Long>> avgChart = chartBuilder.build(sampledResponseTimes, SampledResponseTime::getAvg);
+            Chart<AgentStatPoint<Long>> maxChart = chartBuilder.build(sampledResponseTimes, SampledResponseTime::getMax);
+
+            ImmutableMap.Builder<ChartType, Chart<? extends Point>> builder = ImmutableMap.builder();
+            builder.put(ResponseTimeChartType.AVG, avgChart);
+            builder.put(ResponseTimeChartType.MAX, maxChart);
+            return builder.build();
         }
 
         @Override

@@ -15,13 +15,13 @@
  */
 package com.navercorp.pinpoint.flink;
 
+import com.navercorp.pinpoint.collector.receiver.TCPReceiverBean;
 import com.navercorp.pinpoint.flink.cluster.FlinkServerRegister;
 import com.navercorp.pinpoint.flink.config.FlinkConfiguration;
 import com.navercorp.pinpoint.flink.dao.hbase.*;
 import com.navercorp.pinpoint.flink.process.ApplicationCache;
-import com.navercorp.pinpoint.flink.process.TbaseFlatMapper;
+import com.navercorp.pinpoint.flink.process.TBaseFlatMapper;
 import com.navercorp.pinpoint.flink.receiver.AgentStatHandler;
-import com.navercorp.pinpoint.flink.receiver.TCPReceiver;
 import com.navercorp.pinpoint.flink.receiver.TcpDispatchHandler;
 import com.navercorp.pinpoint.flink.receiver.TcpSourceFunction;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -41,9 +41,9 @@ public class Bootstrap {
 
     private final StatisticsDao statisticsDao;
 
-    private final ApplicationContext applicationContext;
+    private final ClassPathXmlApplicationContext applicationContext;
 
-    private final TbaseFlatMapper tbaseFlatMapper;
+    private final TBaseFlatMapper tbaseFlatMapper;
     private final FlinkConfiguration flinkConfiguration;
     private final TcpDispatchHandler tcpDispatchHandler;
     private final TcpSourceFunction tcpSourceFunction;
@@ -54,12 +54,13 @@ public class Bootstrap {
     private final ActiveTraceDao activeTraceDao;
     private final ResponseTimeDao responseTimeDao;
     private final DataSourceDao dataSourceDao;
+    private final FileDescriptorDao fileDescriptorDao;
 
     private Bootstrap() {
         String[] SPRING_CONFIG_XML = new String[]{"applicationContext-flink.xml", "applicationContext-cache.xml"};
         applicationContext = new ClassPathXmlApplicationContext(SPRING_CONFIG_XML);
 
-        tbaseFlatMapper = applicationContext.getBean("tbaseFlatMapper", TbaseFlatMapper.class);
+        tbaseFlatMapper = applicationContext.getBean("tbaseFlatMapper", TBaseFlatMapper.class);
         flinkConfiguration = applicationContext.getBean("flinkConfiguration", FlinkConfiguration.class);
         tcpDispatchHandler = applicationContext.getBean("tcpDispatchHandler", TcpDispatchHandler.class);
         tcpSourceFunction = applicationContext.getBean("tcpSourceFunction", TcpSourceFunction.class);
@@ -71,6 +72,11 @@ public class Bootstrap {
         activeTraceDao = applicationContext.getBean("activeTraceDao", ActiveTraceDao.class);
         responseTimeDao = applicationContext.getBean("responseTimeDao", ResponseTimeDao.class);
         dataSourceDao = applicationContext.getBean("dataSourceDao", DataSourceDao.class);
+        fileDescriptorDao = applicationContext.getBean("fileDescriptorDao", FileDescriptorDao.class);
+    }
+
+    public FileDescriptorDao getFileDescriptorDao() {
+        return fileDescriptorDao;
     }
 
     public static Bootstrap getInstance() {
@@ -109,7 +115,7 @@ public class Bootstrap {
         return dataSourceDao;
     }
 
-    public TbaseFlatMapper getTbaseFlatMapper() {
+    public TBaseFlatMapper getTbaseFlatMapper() {
         return tbaseFlatMapper;
     }
 
@@ -145,11 +151,12 @@ public class Bootstrap {
         return applicationContext.getBean("flinkServerRegister", FlinkServerRegister.class);
     }
 
-    public TCPReceiver initTcpReceiver() {
-        return applicationContext.getBean("tcpReceiver", TCPReceiver.class);
+    public void initTcpReceiver() {
+        // lazy init
+        applicationContext.getBean("tcpReceiver", TCPReceiverBean.class);
     }
 
-    public TcpSourceFunction getTcpSourceFuncation() {
+    public TcpSourceFunction getTcpSourceFunction() {
         return tcpSourceFunction;
     }
 }

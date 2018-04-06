@@ -17,8 +17,6 @@ package com.navercorp.pinpoint.collector.mapper.thrift.stat;
 
 import com.navercorp.pinpoint.common.server.bo.stat.*;
 import com.navercorp.pinpoint.thrift.dto.flink.TFAgentStat;
-import com.navercorp.pinpoint.thrift.dto.flink.TFDataSourceList;
-import com.navercorp.pinpoint.thrift.dto.flink.TFJvmGc;
 
 import java.util.*;
 
@@ -32,6 +30,7 @@ public class TFAgentStatMapper {
     private static final TFActiveTraceMapper tFActiveTraceMapper = new TFActiveTraceMapper();
     private static final TFResponseTimeMapper tFResponseTimeMapper = new TFResponseTimeMapper();
     private static final TFDataSourceListBoMapper tFDataSourceListBoMapper = new TFDataSourceListBoMapper();
+    private static final TFFileDescriptorMapper tFFileDescriptorBoMapper = new TFFileDescriptorMapper();
 
     public List<TFAgentStat> map(AgentStatBo agentStatBo) {
         final TreeMap<Long, TFAgentStat> tFAgentStatMap = new TreeMap<>();
@@ -44,6 +43,7 @@ public class TFAgentStatMapper {
         insertTFActiveTrace(tFAgentStatMap, agentStatBo.getActiveTraceBos(), agentId, startTimestamp);
         insertTFResponseTime(tFAgentStatMap, agentStatBo.getResponseTimeBos(), agentId, startTimestamp);
         insertTFDataSourceList(tFAgentStatMap, agentStatBo.getDataSourceListBos(), agentId, startTimestamp);
+        insertTFileDescriptorList(tFAgentStatMap, agentStatBo.getFileDescriptorBos(), agentId, startTimestamp);
         return new ArrayList<>(tFAgentStatMap.values());
     }
 
@@ -111,6 +111,17 @@ public class TFAgentStatMapper {
         for (CpuLoadBo cpuLoadBo : cpuLoadBoList) {
             TFAgentStat tFAgentStat = getOrCreateTFAgentStat(tFAgentStatMap, cpuLoadBo.getTimestamp(), agentId, startTimestamp);
             tFAgentStat.setCpuLoad(tFCpuLoadMapper.map(cpuLoadBo));
+        }
+    }
+
+    private void insertTFileDescriptorList(Map<Long, TFAgentStat> tFAgentStatMap, List<FileDescriptorBo> fileDescriptorBoList, String agentId, long startTimestamp) {
+        if (fileDescriptorBoList == null) {
+            return;
+        }
+
+        for (FileDescriptorBo fileDescriptorBo : fileDescriptorBoList) {
+            TFAgentStat tFAgentStat = getOrCreateTFAgentStat(tFAgentStatMap, fileDescriptorBo.getTimestamp(), agentId, startTimestamp);
+            tFAgentStat.setFileDescriptor(tFFileDescriptorBoMapper.map(fileDescriptorBo));
         }
     }
 

@@ -16,8 +16,9 @@
 
 package com.navercorp.pinpoint.web.vo.stat.chart.agent;
 
+import com.google.common.collect.ImmutableMap;
+import com.navercorp.pinpoint.common.annotations.VisibleForTesting;
 import com.navercorp.pinpoint.common.service.ServiceTypeRegistryService;
-import com.navercorp.pinpoint.common.util.CollectionUtils;
 import com.navercorp.pinpoint.rpc.util.ListUtils;
 import com.navercorp.pinpoint.web.util.TimeWindow;
 import com.navercorp.pinpoint.web.vo.chart.Chart;
@@ -26,10 +27,8 @@ import com.navercorp.pinpoint.web.vo.chart.TimeSeriesChartBuilder;
 import com.navercorp.pinpoint.web.vo.stat.SampledDataSource;
 import com.navercorp.pinpoint.web.vo.stat.chart.StatChart;
 import com.navercorp.pinpoint.web.vo.stat.chart.StatChartGroup;
+import org.apache.commons.collections.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -43,8 +42,31 @@ public class DataSourceChart implements StatChart {
     private final DataSourceChartGroup dataSourceChartGroup;
 
     public DataSourceChart(TimeWindow timeWindow, List<SampledDataSource> sampledDataSources, ServiceTypeRegistryService serviceTypeRegistryService) {
-        this.dataSourceChartGroup = new DataSourceChartGroup(timeWindow, sampledDataSources, serviceTypeRegistryService);
+        this.dataSourceChartGroup = newDataSourceChartGroup(timeWindow, sampledDataSources, serviceTypeRegistryService);
     }
+
+    @VisibleForTesting
+    static DataSourceChartGroup newDataSourceChartGroup(TimeWindow timeWindow, List<SampledDataSource> sampledDataSources, ServiceTypeRegistryService serviceTypeRegistryService) {
+        Objects.requireNonNull(timeWindow, "timeWindow must not be null");
+
+        Map<StatChartGroup.ChartType, Chart<? extends Point>> chartTypeChartMap = newDatasourceChart(timeWindow, sampledDataSources);
+        if (CollectionUtils.isNotEmpty(sampledDataSources)) {
+            SampledDataSource latestSampledDataSource = ListUtils.getLast(sampledDataSources);
+
+            int id = latestSampledDataSource.getId();
+            String serviceTypeName = serviceTypeRegistryService.findServiceType(latestSampledDataSource.getServiceTypeCode()).getName();
+            String databaseName = latestSampledDataSource.getDatabaseName();
+            String jdbcUrl = latestSampledDataSource.getJdbcUrl();
+            return new DataSourceChartGroup(timeWindow, chartTypeChartMap, id, serviceTypeName, databaseName, jdbcUrl);
+        } else {
+            final Integer uncollectedValue = SampledDataSource.UNCOLLECTED_VALUE;
+            // TODO avoid null
+            final String uncollectedString = SampledDataSource.UNCOLLECTED_STRING;
+
+            return new DataSourceChartGroup(timeWindow, chartTypeChartMap, uncollectedValue, uncollectedString, uncollectedString, uncollectedString);
+        }
+    }
+
     @Override
     public StatChartGroup getCharts() {
         return dataSourceChartGroup;
@@ -66,6 +88,20 @@ public class DataSourceChart implements StatChart {
         return dataSourceChartGroup.getJdbcUrl();
     }
 
+    @VisibleForTesting
+    static Map<StatChartGroup.ChartType, Chart<? extends Point>> newDatasourceChart(TimeWindow timeWindow, List<SampledDataSource> sampledDataSourceList) {
+        Chart<AgentStatPoint<Integer>> activeConnectionChart = newChart(timeWindow, sampledDataSourceList, SampledDataSource::getActiveConnectionSize);
+        Chart<AgentStatPoint<Integer>> maxConnectionChart = newChart(timeWindow, sampledDataSourceList, SampledDataSource::getMaxConnectionSize);
+
+        return ImmutableMap.of(DataSourceChartGroup.DataSourceChartType.ACTIVE_CONNECTION_SIZE, activeConnectionChart, DataSourceChartGroup.DataSourceChartType.MAX_CONNECTION_SIZE, maxConnectionChart);
+    }
+
+    @VisibleForTesting
+    static Chart<AgentStatPoint<Integer>> newChart(TimeWindow timeWindow, List<SampledDataSource> sampledDataSourceList, Function<SampledDataSource, AgentStatPoint<Integer>> filter) {
+        TimeSeriesChartBuilder<AgentStatPoint<Integer>> builder = new TimeSeriesChartBuilder<>(timeWindow, SampledDataSource.UNCOLLECTED_POINT_CREATOR);
+        return builder.build(sampledDataSourceList, filter);
+    }
+
     public static class DataSourceChartGroup implements StatChartGroup {
 
         private final TimeWindow timeWindow;
@@ -82,58 +118,16 @@ public class DataSourceChart implements StatChart {
             MAX_CONNECTION_SIZE
         }
 
-        public DataSourceChartGroup(TimeWindow timeWindow, List<SampledDataSource> sampledDataSourceList, ServiceTypeRegistryService serviceTypeRegistryService) {
+        public DataSourceChartGroup(TimeWindow timeWindow, Map<ChartType, Chart<? extends Point>> dataSourceCharts, int id, String serviceTypeName, String databaseName, String jdbcUrl) {
             this.timeWindow = Objects.requireNonNull(timeWindow, "timeWindow must not be null");
-
-
-            this.dataSourceCharts = newDatasourceChart(timeWindow, sampledDataSourceList);
-
-            if (CollectionUtils.isEmpty(sampledDataSourceList)) {
-                this.id = SampledDataSource.UNCOLLECTED_VALUE;
-                this.serviceTypeName = SampledDataSource.UNCOLLECTED_STRING;
-                this.databaseName = SampledDataSource.UNCOLLECTED_STRING;
-                this.jdbcUrl = SampledDataSource.UNCOLLECTED_STRING;
-            } else {
-                SampledDataSource latestSampledDataSource = ListUtils.getLast(sampledDataSourceList);
-
-                this.id = latestSampledDataSource.getId();
-                this.serviceTypeName = serviceTypeRegistryService.findServiceType(latestSampledDataSource.getServiceTypeCode()).getName();
-                this.databaseName = latestSampledDataSource.getDatabaseName();
-                this.jdbcUrl = latestSampledDataSource.getJdbcUrl();
-            }
+            this.dataSourceCharts = dataSourceCharts;
+            this.id = id;
+            this.serviceTypeName = serviceTypeName;
+            this.databaseName = databaseName;
+            this.jdbcUrl = jdbcUrl;
         }
 
-        private Map<ChartType, Chart<? extends Point>> newDatasourceChart(TimeWindow timeWindow, List<SampledDataSource> sampledDataSourceList) {
-            List<AgentStatPoint<Integer>> activeConnectionSizes = filterDataSourceList(sampledDataSourceList, SampledDataSource::getActiveConnectionSize);
-            Chart<AgentStatPoint<Integer>> activeConnectionChart = buildChart(timeWindow, activeConnectionSizes);
 
-            List<AgentStatPoint<Integer>> maxConnectionSizes = filterDataSourceList(sampledDataSourceList, SampledDataSource::getMaxConnectionSize);
-            Chart<AgentStatPoint<Integer>> maxConnectionChart = buildChart(timeWindow, maxConnectionSizes);
-
-            Map<ChartType, Chart<? extends Point>> chart = new HashMap<>();
-            chart.put(DataSourceChartType.ACTIVE_CONNECTION_SIZE, activeConnectionChart);
-            chart.put(DataSourceChartType.MAX_CONNECTION_SIZE, maxConnectionChart);
-            return chart;
-        }
-
-        private List<AgentStatPoint<Integer>> filterDataSourceList(List<SampledDataSource> dataSourceList, Function<SampledDataSource, AgentStatPoint<Integer>> filter) {
-            if (CollectionUtils.isEmpty(dataSourceList)) {
-                return Collections.emptyList();
-            }
-
-            final List<AgentStatPoint<Integer>> result = new ArrayList<>(dataSourceList.size());
-            for (SampledDataSource sampledDataSource : dataSourceList) {
-                AgentStatPoint<Integer> apply = filter.apply(sampledDataSource);
-                result.add(apply);
-            }
-            return result;
-        }
-
-        private Chart<AgentStatPoint<Integer>> buildChart(TimeWindow timeWindow, List<AgentStatPoint<Integer>> activeConnectionSizes) {
-            TimeSeriesChartBuilder<AgentStatPoint<Integer>> builder = new TimeSeriesChartBuilder<>(timeWindow, SampledDataSource.UNCOLLECTED_POINT_CREATOR);
-            Chart<AgentStatPoint<Integer>> chart = builder.build(activeConnectionSizes);
-            return chart;
-        }
 
         @Override
         public TimeWindow getTimeWindow() {

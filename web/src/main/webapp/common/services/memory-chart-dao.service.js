@@ -58,7 +58,7 @@
 							} else {
 								var yValue = aChartData.charts.y[category[j]["id"]][i][1];
 								if (yValue > 0) {
-									thisData[category[j].key] = yValue;
+									thisData[category[j].key] = yValue === -1 ? null : yValue;
 								}
 							}
 						}
@@ -83,7 +83,13 @@
 						"position": "top",
 						"valueWidth": 70,
 						"markerSize": 10,
-						"valueAlign": "left"
+						"valueAlign": "left",
+						"valueFunction": function(graphDataItem, valueText) {
+							if ( parseInt( valueText ) === -1 ) {
+								return "";
+							}
+							return valueText;
+						}
 					},
 					"usePrefixes": true,
 					"dataProvider": oChartData.data,

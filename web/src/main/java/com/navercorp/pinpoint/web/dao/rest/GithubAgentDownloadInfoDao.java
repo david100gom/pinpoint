@@ -16,19 +16,17 @@
 
 package com.navercorp.pinpoint.web.dao.rest;
 
-import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.navercorp.pinpoint.common.util.CollectionUtils;
 import com.navercorp.pinpoint.common.util.IdValidateUtils;
 import com.navercorp.pinpoint.web.dao.AgentDownloadInfoDao;
 import com.navercorp.pinpoint.web.vo.AgentDownloadInfo;
 import com.navercorp.pinpoint.web.vo.GithubAgentDownloadInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -36,7 +34,6 @@ import java.util.regex.Pattern;
 /**
  * @author Taejin Koo
  */
-@Repository
 public class GithubAgentDownloadInfoDao implements AgentDownloadInfoDao {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -47,23 +44,25 @@ public class GithubAgentDownloadInfoDao implements AgentDownloadInfoDao {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Autowired
     public List<AgentDownloadInfo> getDownloadInfoList() {
-        RestTemplate restTemplate = new RestTemplate();
-
-        String responseBody = restTemplate.getForObject(GITHUB_API_URL, String.class);
-        JavaType agentDownloadInfoListType = objectMapper.getTypeFactory().constructCollectionType(List.class, GithubAgentDownloadInfo.class);
-
         List<AgentDownloadInfo> result = new ArrayList<>();
         try {
-            List<GithubAgentDownloadInfo> agentDownloadInfoList = objectMapper.readValue(responseBody, agentDownloadInfoListType);
+            RestTemplate restTemplate = new RestTemplate();
+            String responseBody = restTemplate.getForObject(GITHUB_API_URL, String.class);
+
+            TypeReference<List<GithubAgentDownloadInfo>> typeReference = new TypeReference<List<GithubAgentDownloadInfo>>() {};
+            List<GithubAgentDownloadInfo> agentDownloadInfoList = objectMapper.readValue(responseBody, typeReference);
+
+            if (CollectionUtils.isEmpty(agentDownloadInfoList)) {
+                return result;
+            }
 
             for (GithubAgentDownloadInfo agentDownloadInfo : agentDownloadInfoList) {
                 if (STABLE_VERSION_PATTERN.matcher(agentDownloadInfo.getVersion()).matches()) {
                     result.add(agentDownloadInfo);
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.warn(e.getMessage(), e);
         }
 

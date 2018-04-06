@@ -42,7 +42,7 @@ public class TimeSeriesChartBuilderTest {
     private static class TestPoint implements Point {
 
         private static final int UNCOLLECTED_VALUE = -1;
-        private static final UncollectedPointCreator<TestPoint> UNCOLLECTED_POINT_CREATER = new UncollectedPointCreator<TestPoint>() {
+        private static final UncollectedPointCreator<TestPoint> UNCOLLECTED_POINT_CREATOR = new UncollectedPointCreator<TestPoint>() {
             @Override
             public TestPoint createUnCollectedPoint(long xVal) {
                 return new TestPoint(xVal, UNCOLLECTED_VALUE);
@@ -58,11 +58,11 @@ public class TimeSeriesChartBuilderTest {
         }
 
         @Override
-        public long getxVal() {
+        public long getXVal() {
             return xVal;
         }
 
-        public int getyVal() {
+        public int getYVal() {
             return yVal;
         }
     }
@@ -72,7 +72,7 @@ public class TimeSeriesChartBuilderTest {
         // Given
         int numSlots = 10;
         TimeWindow timeWindow = new TimeWindow(new Range(0, TIME_WINDOW_SIZE * numSlots), TIME_WINDOW_SAMPLER);
-        TimeSeriesChartBuilder<TestPoint> builder = new TimeSeriesChartBuilder<>(timeWindow, TestPoint.UNCOLLECTED_POINT_CREATER);
+        TimeSeriesChartBuilder<TestPoint> builder = new TimeSeriesChartBuilder<>(timeWindow, TestPoint.UNCOLLECTED_POINT_CREATOR);
         List<TestPoint> points = Collections.emptyList();
         // When
         Chart<TestPoint> chart = builder.build(points);
@@ -86,7 +86,7 @@ public class TimeSeriesChartBuilderTest {
         // Given
         int numSlots = 100;
         TimeWindow timeWindow = new TimeWindow(new Range(0, TIME_WINDOW_SIZE * numSlots), TIME_WINDOW_SAMPLER);
-        TimeSeriesChartBuilder<TestPoint> builder = new TimeSeriesChartBuilder<>(timeWindow, TestPoint.UNCOLLECTED_POINT_CREATER);
+        TimeSeriesChartBuilder<TestPoint> builder = new TimeSeriesChartBuilder<>(timeWindow, TestPoint.UNCOLLECTED_POINT_CREATOR);
         List<TestPoint> points = new ArrayList<>(TIME_WINDOW_SIZE * numSlots);
         for (int i = 0; i <= TIME_WINDOW_SIZE * numSlots; i++) {
             points.add(new TestPoint(i, i / TIME_WINDOW_SIZE));
@@ -96,7 +96,7 @@ public class TimeSeriesChartBuilderTest {
         // Then
         List<TestPoint> sampledPoints = chart.getPoints();
         for (int i = 0; i < sampledPoints.size(); i++) {
-            Assert.assertEquals(i, sampledPoints.get(i).getyVal());
+            Assert.assertEquals(i, sampledPoints.get(i).getYVal());
         }
 
     }

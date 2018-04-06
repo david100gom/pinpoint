@@ -15,14 +15,12 @@
  */
 package com.navercorp.pinpoint.flink.dao.hbase;
 
-import com.navercorp.pinpoint.common.hbase.HBaseTables;
 import com.navercorp.pinpoint.common.server.bo.stat.join.*;
 import com.navercorp.pinpoint.flink.Bootstrap;
 import org.apache.flink.api.common.io.OutputFormat;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.CollectionUtil;
-import org.apache.hadoop.hbase.TableName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,13 +35,13 @@ public class StatisticsDao implements OutputFormat<Tuple3<String, JoinStatBo, Lo
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private static final long serialVersionUID = 1L;
-    private transient TableName APPLICATION_STAT_AGGRE;
     private transient CpuLoadDao cpuLoadDao;
     private transient MemoryDao memoryDao;
     private transient TransactionDao transactionDao;
     private transient ActiveTraceDao activeTraceDao;
     private transient ResponseTimeDao responseTimeDao;
     private transient DataSourceDao dataSourceDao;
+    private transient FileDescriptorDao fileDescriptorDao;
 
 
     public StatisticsDao() {
@@ -51,7 +49,6 @@ public class StatisticsDao implements OutputFormat<Tuple3<String, JoinStatBo, Lo
 
     @Override
     public void configure(Configuration parameters) {
-        this.APPLICATION_STAT_AGGRE = HBaseTables.APPLICATION_STAT_AGGRE;
         Bootstrap bootstrap = Bootstrap.getInstance();
         cpuLoadDao = bootstrap.getCpuLoadDao();
         memoryDao = bootstrap.getMemoryDao();
@@ -59,6 +56,7 @@ public class StatisticsDao implements OutputFormat<Tuple3<String, JoinStatBo, Lo
         activeTraceDao = bootstrap.getActiveTraceDao();
         responseTimeDao = bootstrap.getResponseTimeDao();
         dataSourceDao = bootstrap.getDataSourceDao();
+        fileDescriptorDao = bootstrap.getFileDescriptorDao();
     }
 
     @Override
@@ -88,6 +86,7 @@ public class StatisticsDao implements OutputFormat<Tuple3<String, JoinStatBo, Lo
         List<JoinStatBo> joinActiveTraceBoList = castJoinStatBoList(joinApplicationStatBo.getJoinActiveTraceBoList());
         List<JoinStatBo> joinResponseTimeBoList = castJoinStatBoList(joinApplicationStatBo.getJoinResponseTimeBoList());
         List<JoinStatBo> joinDataSourceBoList = castJoinStatBoList(joinApplicationStatBo.getJoinDataSourceListBoList());
+        List<JoinStatBo> joinFileDescriptorBoList = castJoinStatBoList(joinApplicationStatBo.getJoinFileDescriptorBoList());
 
         if (joinApplicationStatBo.getStatType() == StatType.APP_STST_AGGRE) {
 //            logger.info("insert application aggre : " + new Date(joinApplicationStatBo.getTimestamp()) + " ("+ joinApplicationStatBo.getApplicationId() + " )");
@@ -100,6 +99,7 @@ public class StatisticsDao implements OutputFormat<Tuple3<String, JoinStatBo, Lo
             activeTraceDao.insert(id, timestamp, joinActiveTraceBoList, StatType.APP_ACTIVE_TRACE_COUNT);
             responseTimeDao.insert(id, timestamp, joinResponseTimeBoList, StatType.APP_RESPONSE_TIME);
             dataSourceDao.insert(id, timestamp, joinDataSourceBoList, StatType.APP_DATA_SOURCE);
+            fileDescriptorDao.insert(id, timestamp, joinFileDescriptorBoList, StatType.APP_FILE_DESCRIPTOR);
         }
     }
 

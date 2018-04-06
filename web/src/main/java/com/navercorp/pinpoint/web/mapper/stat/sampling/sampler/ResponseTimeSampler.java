@@ -36,27 +36,44 @@ public class ResponseTimeSampler implements AgentStatSampler<ResponseTimeBo, Sam
 
     @Override
     public SampledResponseTime sampleDataPoints(int timeWindowIndex, long timestamp, List<ResponseTimeBo> dataPoints, ResponseTimeBo previousDataPoint) {
+        List<Long> avgs = getAvg(dataPoints);
+        AgentStatPoint<Long> avg = createPoint(timestamp, avgs);
+
+        List<Long> maxs = getMax(dataPoints);
+        AgentStatPoint<Long> max = createPoint(timestamp, maxs);
+
+        SampledResponseTime sampledResponseTime = new SampledResponseTime(avg, max);
+        return sampledResponseTime;
+    }
+
+    private List<Long> getAvg(List<ResponseTimeBo> dataPoints) {
         List<Long> avgs = new ArrayList<>(dataPoints.size());
         for (ResponseTimeBo responseTimeBo : dataPoints) {
             avgs.add(responseTimeBo.getAvg());
         }
+        return avgs;
+    }
 
-        SampledResponseTime sampledResponseTime = new SampledResponseTime();
-        sampledResponseTime.setAvg(createPoint(timestamp, avgs));
-        return sampledResponseTime;
+    private List<Long> getMax(List<ResponseTimeBo> dataPoints) {
+        List<Long> maxs = new ArrayList<>(dataPoints.size());
+        for (ResponseTimeBo responseTimeBo : dataPoints) {
+            maxs.add(responseTimeBo.getMax());
+        }
+        return maxs;
     }
 
     private AgentStatPoint<Long> createPoint(long timestamp, List<Long> values) {
         if (values.isEmpty()) {
-            return SampledResponseTime.UNCOLLECTED_POINT_CREATER.createUnCollectedPoint(timestamp);
-        } else {
-            return new AgentStatPoint<>(
-                    timestamp,
-                    LONG_DOWN_SAMPLER.sampleMin(values),
-                    LONG_DOWN_SAMPLER.sampleMax(values),
-                    LONG_DOWN_SAMPLER.sampleAvg(values),
-                    LONG_DOWN_SAMPLER.sampleSum(values));
+            return SampledResponseTime.UNCOLLECTED_POINT_CREATOR.createUnCollectedPoint(timestamp);
         }
+
+        return new AgentStatPoint<>(
+                timestamp,
+                LONG_DOWN_SAMPLER.sampleMin(values),
+                LONG_DOWN_SAMPLER.sampleMax(values),
+                LONG_DOWN_SAMPLER.sampleAvg(values),
+                LONG_DOWN_SAMPLER.sampleSum(values));
+
     }
 
 }
